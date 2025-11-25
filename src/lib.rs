@@ -1,10 +1,12 @@
-enum TokenKind {/// Represents a single token in the input stream.
+#[derive(Debug)]
+pub enum TokenKind {
+    /// Represents a single token in the input stream.
     /// The left parenthesis '(' token.
-    LeftParen, 
+    LeftParen,
     /// The right parenthesis ')' token.
-    RightParen, 
+    RightParen,
     /// The left curly brace '{' token.
-    LeftCurlyParen, 
+    LeftCurlyParen,
     /// The right curly brace '}' token.
     RightCurlyParen,
     /// The left square bracket '[' token.
@@ -18,15 +20,14 @@ enum TokenKind {/// Represents a single token in the input stream.
     /// The semicolon ';' token.
     SemiColon,
     /// The colon ':' token.
-    Colon, 
+    Colon,
     /// End of file (EOF) token.
     EOF,
 }
 
-
 /// Represents a single token in the input stream.
-struct Token {
-    kind: TokenKind,
-    literal: String,
+#[derive(Debug)]
+pub struct Token {
+    pub kind: TokenKind,
+    pub literal: String,
 }
-
