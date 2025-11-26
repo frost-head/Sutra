@@ -6,7 +6,7 @@ mod tests;
 pub struct Lexer {
     input: String,
     pos: usize,
-    output: Vec<Token>,
+    pub output: Vec<Token>,
 }
 
 impl Lexer {
@@ -15,6 +15,22 @@ impl Lexer {
             input,
             pos: 0,
             output: Vec::new(),
+        }
+    }
+
+    pub fn lex(&mut self) {
+        loop {
+            let tok = self.next();
+            let tok = match tok {
+                Some(tok) => tok,
+                None => panic!("Unknown toknen"), // TODO remove panic
+            };
+            if tok.kind == TokenKind::EOF {
+                self.output.push(tok);
+                break;
+            } else {
+                self.output.push(tok);
+            }
         }
     }
 }

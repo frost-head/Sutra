@@ -31,3 +31,21 @@ fn second_token() {
     println!("Printing perfect token :: {:?}", perfect);
     assert_eq!(tok, perfect);
 }
+
+#[test]
+fn all_tokens() {
+    let mut lexer = Lexer::new(String::from("()[]{}"));
+    lexer.lex();
+
+    let out = vec![
+        Token::new(TokenKind::LeftParen, String::from("(")),
+        Token::new(TokenKind::RightParen, String::from(")")),
+        Token::new(TokenKind::LeftSquareParen, String::from("[")),
+        Token::new(TokenKind::RightSquareParen, String::from("]")),
+        Token::new(TokenKind::LeftCurlyParen, String::from("{")),
+        Token::new(TokenKind::RightCurlyParen, String::from("}")),
+        Token::new(TokenKind::EOF, String::from("EOF")),
+    ];
+
+    assert_eq!(lexer.output, out);
+}
