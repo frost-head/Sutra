@@ -2,7 +2,7 @@ use super::*;
 
 #[test]
 fn first_token() {
-    let mut lexer = Lexer::new(String::from("("));
+    let mut lexer = Lexer::new("(");
     let tok = lexer.next();
     let tok = match tok {
         Some(token) => token,
@@ -17,7 +17,7 @@ fn first_token() {
 
 #[test]
 fn second_token() {
-    let mut lexer = Lexer::new(String::from("()"));
+    let mut lexer = Lexer::new("()");
     let _ = lexer.next();
     let tok = lexer.next();
     let tok = match tok {
@@ -34,7 +34,7 @@ fn second_token() {
 
 #[test]
 fn all_tokens() {
-    let mut lexer = Lexer::new(String::from("()[]{}"));
+    let mut lexer = Lexer::new("()[]{}");
     lexer.lex();
 
     let out = vec![
