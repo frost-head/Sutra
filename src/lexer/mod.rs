@@ -1,6 +1,5 @@
-use std::{iter::Peekable, str::Chars};
-
 use crate::lexer::token::{Token, TokenKind};
+use std::{iter::Peekable, str::Chars};
 
 #[cfg(test)]
 mod tests;
