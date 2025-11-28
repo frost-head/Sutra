@@ -5,7 +5,7 @@ pub enum TokenKind {
     LeftParen,
     /// The right parenthesis ')' token.
     RightParen,
-    /// The left curly brace '{' token.
+    /// The lefe curly brace '{' token.
     LeftCurlyParen,
     /// The right curly brace '}' token.
     RightCurlyParen,
@@ -24,7 +24,7 @@ pub enum TokenKind {
     /// The comma ',' token.
     Comma,
     /// The equal '=' token.
-    Equal,  
+    Equal,
     /// The plus '+' token.
     Plus,
     /// The minus '-' token.
@@ -43,7 +43,7 @@ pub enum TokenKind {
     IDENT,
     /// End of file (EOF) token.
     EOF,
-   
+
     LET,
     IF,
     ELSE,
@@ -54,9 +54,7 @@ pub enum TokenKind {
     STRUCT,
 }
 
-
-
-// TODO Create keywords 
+// TODO Create keywords
 
 /// Represents a single token in the input stream.
 #[derive(Debug, PartialEq)]

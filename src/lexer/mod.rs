@@ -1,9 +1,10 @@
 use std::{iter::Peekable, str::Chars};
 
-use super::token::{Token, TokenKind};
+use crate::lexer::token::{Token, TokenKind};
 
 #[cfg(test)]
 mod tests;
+pub mod token;
 
 pub struct Lexer<'a> {
     input: &'a str,
