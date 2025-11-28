@@ -24,7 +24,7 @@ pub enum TokenKind {
     /// The comma ',' token.
     Comma,
     /// The equal '=' token.
-    Equal,
+    Equal,  
     /// The plus '+' token.
     Plus,
     /// The minus '-' token.
@@ -43,7 +43,18 @@ pub enum TokenKind {
     IDENT,
     /// End of file (EOF) token.
     EOF,
+   
+    LET,
+    IF,
+    ELSE,
+    WHILE,
+    FOR,
+    RETURN,
+    FUNC,
+    STRUCT,
 }
+
+
 
 // TODO Create keywords 
 

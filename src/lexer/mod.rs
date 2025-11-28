@@ -35,11 +35,13 @@ impl<'a> Lexer<'a> {
             }
         }
     }
-    
+
     fn read_number(&mut self) -> Token {
         let mut number = String::new();
         while let Some(c) = self.chars.peek() {
+            println!("fn num out {}", c);
             if c.is_digit(10) {
+                println!("fn num in {}", c);
                 number.push(*c);
                 self.chars.next();
             } else {
@@ -48,11 +50,28 @@ impl<'a> Lexer<'a> {
         }
         Token::new(TokenKind::INT, number)
     }
-    
+
+    fn match_keyword(&mut self, indent: &str) -> Token {
+        match indent {
+            "if" => Token::new(TokenKind::IF, "if".to_string()),
+
+            "else" => Token::new(TokenKind::ELSE, "else".to_string()),
+            "while" => Token::new(TokenKind::WHILE, "while".to_string()),
+            "for" => Token::new(TokenKind::FOR, "for".to_string()),
+            "return" => Token::new(TokenKind::RETURN, "return".to_string()),
+            "func" => Token::new(TokenKind::FUNC, "func".to_string()),
+            "struct" => Token::new(TokenKind::STRUCT, "struct".to_string()),
+            "let" => Token::new(TokenKind::LET, "let".to_string()),
+            _ => Token::new(TokenKind::IDENT, indent.to_string()),
+        }
+    }
+
     fn read_identifier(&mut self) -> Token {
         let mut identifier = String::new();
         while let Some(c) = self.chars.peek() {
+            println!("fn ind out {}", c);
             if c.is_alphanumeric() || *c == '_' {
+                println!("fn ind in {}", c);
                 identifier.push(*c);
                 self.chars.next();
             } else {
@@ -60,18 +79,19 @@ impl<'a> Lexer<'a> {
             }
         }
         // TODO Check if identifier is a keyword
-        Token::new(TokenKind::IDENT, identifier)
+        self.match_keyword(&identifier)
     }
     fn skip_whitespace(&mut self) {
         while let Some(c) = self.chars.peek() {
+            println!("white out {}", c);
             if c.is_whitespace() {
+                print!("white in {}", c);
                 self.chars.next();
             } else {
                 break;
             }
         }
     }
-
 }
 
 impl Iterator for Lexer<'_> {
@@ -79,10 +99,12 @@ impl Iterator for Lexer<'_> {
 
     fn next(&mut self) -> Option<Self::Item> {
         self.skip_whitespace();
+        let mut do_next: bool = true;
         let c = match self.chars.peek() {
             Some(c) => c,
             None => return Some(Token::new(TokenKind::EOF, String::from("EOF"))),
         };
+        println!("next out {}", c);
         let tok = match *c {
             '(' => Token::new(TokenKind::LeftParen, c.to_string()),
             ')' => Token::new(TokenKind::RightParen, c.to_string()),
@@ -101,15 +123,21 @@ impl Iterator for Lexer<'_> {
             '*' => Token::new(TokenKind::Star, c.to_string()),
             '/' => Token::new(TokenKind::Slash, c.to_string()),
             '%' => Token::new(TokenKind::Percent, c.to_string()),
-            _ => if c.is_alphabetic() {
-                self.read_identifier()
-            } else if c.is_numeric() {
-                self.read_number()
-            } else {
-                Token::new(TokenKind::Illegal, c.to_string())
-            },
+            _ => {
+                if c.is_alphabetic() {
+                    do_next = false; // read_identifier performs self.chars.next() to stop doing it twice we need this flag
+                    self.read_identifier()
+                } else if c.is_numeric() {
+                    do_next = false; // read_identifier performs self.chars.next() to stop doing it twice we need this flag
+                    self.read_number()
+                } else {
+                    Token::new(TokenKind::Illegal, c.to_string())
+                }
+            }
         };
-        self.chars.next(); 
+        if do_next {
+            self.chars.next();
+        }
         return Some(tok);
     }
 }

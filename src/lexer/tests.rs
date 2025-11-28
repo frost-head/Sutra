@@ -49,3 +49,30 @@ fn all_tokens() {
 
     assert_eq!(lexer.output, out);
 }
+
+#[test]
+fn func() {
+    let mut lexer = Lexer::new("
+        func main() {
+            let x = 5;
+        }
+        ");
+    lexer.lex();
+
+    let out = vec![
+        Token::new(TokenKind::FUNC, String::from("func")),
+        Token::new(TokenKind::IDENT, String::from("main")),
+        Token::new(TokenKind::LeftParen, String::from("(")),
+        Token::new(TokenKind::RightParen, String::from(")")),
+        Token::new(TokenKind::LeftCurlyParen, String::from("{")),
+        Token::new(TokenKind::LET, String::from("let")),
+        Token::new(TokenKind::IDENT, String::from("x")),
+        Token::new(TokenKind::Equal, String::from("=")),
+        Token::new(TokenKind::INT, String::from("5")),
+        Token::new(TokenKind::SemiColon, String::from(";")),
+        Token::new(TokenKind::RightCurlyParen, String::from("}")),
+        Token::new(TokenKind::EOF, String::from("EOF")),
+    ];
+
+    assert_eq!(lexer.output, out);
+}
