@@ -35,17 +35,55 @@ impl<'a> Lexer<'a> {
             }
         }
     }
+    
+    fn read_number(&mut self) -> Token {
+        let mut number = String::new();
+        while let Some(c) = self.chars.peek() {
+            if c.is_digit(10) {
+                number.push(*c);
+                self.chars.next();
+            } else {
+                break;
+            }
+        }
+        Token::new(TokenKind::INT, number)
+    }
+    
+    fn read_identifier(&mut self) -> Token {
+        let mut identifier = String::new();
+        while let Some(c) = self.chars.peek() {
+            if c.is_alphanumeric() || *c == '_' {
+                identifier.push(*c);
+                self.chars.next();
+            } else {
+                break;
+            }
+        }
+        // TODO Check if identifier is a keyword
+        Token::new(TokenKind::IDENT, identifier)
+    }
+    fn skip_whitespace(&mut self) {
+        while let Some(c) = self.chars.peek() {
+            if c.is_whitespace() {
+                self.chars.next();
+            } else {
+                break;
+            }
+        }
+    }
+
 }
 
 impl Iterator for Lexer<'_> {
     type Item = Token;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let c = match self.chars.next() {
+        self.skip_whitespace();
+        let c = match self.chars.peek() {
             Some(c) => c,
             None => return Some(Token::new(TokenKind::EOF, String::from("EOF"))),
         };
-        return Some(match c {
+        let tok = match *c {
             '(' => Token::new(TokenKind::LeftParen, c.to_string()),
             ')' => Token::new(TokenKind::RightParen, c.to_string()),
             '{' => Token::new(TokenKind::LeftCurlyParen, c.to_string()),
@@ -57,7 +95,21 @@ impl Iterator for Lexer<'_> {
             ':' => Token::new(TokenKind::Colon, c.to_string()),
             ';' => Token::new(TokenKind::SemiColon, c.to_string()),
             ',' => Token::new(TokenKind::Comma, c.to_string()),
-            _ => panic!("Unexpected character: {}", c),
-        });
+            '=' => Token::new(TokenKind::Equal, c.to_string()),
+            '+' => Token::new(TokenKind::Plus, c.to_string()),
+            '-' => Token::new(TokenKind::Minus, c.to_string()),
+            '*' => Token::new(TokenKind::Star, c.to_string()),
+            '/' => Token::new(TokenKind::Slash, c.to_string()),
+            '%' => Token::new(TokenKind::Percent, c.to_string()),
+            _ => if c.is_alphabetic() {
+                self.read_identifier()
+            } else if c.is_numeric() {
+                self.read_number()
+            } else {
+                Token::new(TokenKind::Illegal, c.to_string())
+            },
+        };
+        self.chars.next(); 
+        return Some(tok);
     }
 }

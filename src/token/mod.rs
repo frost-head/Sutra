@@ -23,9 +23,29 @@ pub enum TokenKind {
     Colon,
     /// The comma ',' token.
     Comma,
+    /// The equal '=' token.
+    Equal,
+    /// The plus '+' token.
+    Plus,
+    /// The minus '-' token.
+    Minus,
+    /// The star '*' token.
+    Star,
+    /// The slash '/' token.
+    Slash,
+    /// The percent '%' token.
+    Percent,
+    /// Illegal token.
+    Illegal,
+    /// Integer token.
+    INT,
+    /// Identifier token.
+    IDENT,
     /// End of file (EOF) token.
     EOF,
 }
+
+// TODO Create keywords 
 
 /// Represents a single token in the input stream.
 #[derive(Debug, PartialEq)]
