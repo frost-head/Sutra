@@ -54,7 +54,6 @@ impl<'a> Lexer<'a> {
     fn match_keyword(&mut self, indent: &str) -> Token {
         match indent {
             "if" => Token::new(TokenKind::IF, "if".to_string()),
-
             "else" => Token::new(TokenKind::ELSE, "else".to_string()),
             "while" => Token::new(TokenKind::WHILE, "while".to_string()),
             "for" => Token::new(TokenKind::FOR, "for".to_string()),
