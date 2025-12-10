@@ -1,10 +1,12 @@
 use sutra::lexer::Lexer;
+use sutra::parser::Parser;
 
 fn main() {
-    let inp: &str = "x=5;let";
-    let mut lexer = Lexer::new(inp);
-    lexer.lex();
+    let inp: &str = "let x = 5;";
+    let lexer = Lexer::new(inp);
 
-    println!("{:#?}", lexer.output);
+    let mut parser = Parser::new(lexer, Vec<dyn Statement>::new());
+
+    let out = parser.parseLetStatement()?;
+    println!("{:#?}", out);
 }
-

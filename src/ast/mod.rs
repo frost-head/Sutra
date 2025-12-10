@@ -1,13 +1,18 @@
 use crate::lexer::token::Token;
 
-pub struct Root {}
+pub struct Ast {
+    pub statements: Vec<dyn Statement>,
+}
 
-impl Root {
-    pub fn new() -> Root {
-        Root {}
+pub trait Statement {
+    fn statement()
+    where
+        Self: Sized,
+    {
     }
 }
 
+#[derive(Debug)]
 pub struct Expresion {
     exp: Vec<Token>,
 }
@@ -22,14 +27,19 @@ impl Expresion {
     }
 }
 
+#[derive(Debug)]
 pub struct LetStatement {
-    statement: Vec<Token>,
-    indetifier: Token,
+    identifier: Token,
     value: Expresion,
 }
 
+impl Statement for LetStatement {}
+
 impl LetStatement {
-    pub fn new() -> LetStatement {
-        todo!("Implement method");
+    pub fn new(identifier: Token, value: Expresion) -> LetStatement {
+        LetStatement {
+            identifier: identifier,
+            value: value,
+        }
     }
 }
