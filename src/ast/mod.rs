@@ -1,15 +1,12 @@
 use crate::lexer::token::Token;
+use std::fmt::{self, Display};
 
 pub struct Ast {
-    pub statements: Vec<dyn Statement>,
+    pub statements: Vec<Box<dyn Statement>> ,
 }
 
-pub trait Statement {
-    fn statement()
-    where
-        Self: Sized,
-    {
-    }
+pub trait Statement : Display {
+    fn statement(&self){}
 }
 
 #[derive(Debug)]
@@ -42,4 +39,16 @@ impl LetStatement {
             value: value,
         }
     }
+
+}
+
+impl Display for LetStatement {
+   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    write!(
+        f,
+        "Let Statement:\n  Identifier: {:#?}\n  Value: {:#?}",
+        self.identifier, self.value
+    )
+}
+
 }

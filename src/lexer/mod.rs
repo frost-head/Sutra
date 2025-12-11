@@ -39,9 +39,7 @@ impl<'a> Lexer<'a> {
     fn read_number(&mut self) -> Token {
         let mut number = String::new();
         while let Some(c) = self.chars.peek() {
-            println!("fn num out {}", c);
             if c.is_digit(10) {
-                println!("fn num in {}", c);
                 number.push(*c);
                 self.chars.next();
             } else {
@@ -68,9 +66,7 @@ impl<'a> Lexer<'a> {
     fn read_identifier(&mut self) -> Token {
         let mut identifier = String::new();
         while let Some(c) = self.chars.peek() {
-            println!("fn ind out {}", c);
             if c.is_alphanumeric() || *c == '_' {
-                println!("fn ind in {}", c);
                 identifier.push(*c);
                 self.chars.next();
             } else {
@@ -82,9 +78,7 @@ impl<'a> Lexer<'a> {
     }
     fn skip_whitespace(&mut self) {
         while let Some(c) = self.chars.peek() {
-            println!("white out {}", c);
             if c.is_whitespace() {
-                print!("white in {}", c);
                 self.chars.next();
             } else {
                 break;
@@ -103,7 +97,6 @@ impl Iterator for Lexer<'_> {
             Some(c) => c,
             None => return Some(Token::new(TokenKind::EOF, String::from("EOF"))),
         };
-        println!("next out {}", c);
         let tok = match *c {
             '(' => Token::new(TokenKind::LeftParen, c.to_string()),
             ')' => Token::new(TokenKind::RightParen, c.to_string()),

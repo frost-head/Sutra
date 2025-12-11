@@ -17,13 +17,30 @@ impl<'a> Parser<'a>{
         Parser{
             tokens : lexer.peekable(),
             ast : Ast{
-                statements: Vec<Statement>::new()
+                statements: Vec::new()
             }
         }
     }
 
-    pub fn parse(&self){
-        todo!("implement parse method");
+    pub fn parse(&mut self){
+        loop {
+            let next = self.tokens.peek();
+            let next = match next {
+                Some(n) => n,
+                None => panic!("Unkown Token"),
+            };
+            if next.kind == TokenKind::EOF{
+                break
+            }
+            else {
+                let st = self.parseLetStatement();
+                let st = match st{
+                    Some(s) => s, 
+                    None => panic!("Unknown Error"),
+                };
+                self.ast.statements.push(Box::new(st));
+            }
+        }
     }
 
     pub fn parseLetStatement(&mut self) -> Option<LetStatement>{
@@ -57,8 +74,11 @@ impl<'a> Parser<'a>{
         loop {
 
             let cur : Token = self.tokens.next()?;
-            if cur.kind == TokenKind::SemiColon{
+            if cur.kind == TokenKind::SemiColon {
                 break;
+            }
+            else if  cur.kind == TokenKind::EOF{
+                panic!("wrong token");
             }
             else{
                 exepresion.push(cur);
