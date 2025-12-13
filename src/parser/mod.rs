@@ -29,15 +29,19 @@ impl<'a> Parser<'a> {
                 Some(n) => n,
                 None => panic!("Unkown Token"),
             };
-            if next.kind == TokenKind::EOF {
-                break;
-            } else {
-                let st = self.parse_let_statement();
-                let st = match st {
-                    Some(s) => s,
-                    None => panic!("Unknown Error"),
-                };
-                self.ast.statements.push(Box::new(st));
+            match next.kind {
+                TokenKind::EOF => break,
+                TokenKind::LET => {
+                    let st = self.parse_let_statement();
+                    let st = match st {
+                        Some(s) => s,
+                        None => panic!("Unknown Error"),
+                    };
+                    self.ast.statements.push(Box::new(st));
+                }
+                _ => {
+                    panic!("Wrong Token")
+                }
             }
         }
     }
