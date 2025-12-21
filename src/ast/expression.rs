@@ -9,8 +9,4 @@ impl Expresion {
     pub fn new(tokens: Vec<Token>) -> Expresion {
         Expresion { exp: tokens }
     }
-
-    pub(crate) fn eval(&self) -> Token {
-        todo!("Implement the method");
-    }
 }
