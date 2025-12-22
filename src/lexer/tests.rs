@@ -52,11 +52,13 @@ fn all_tokens() {
 
 #[test]
 fn func() {
-    let mut lexer = Lexer::new("
+    let mut lexer = Lexer::new(
+        "
         func main() {
             let x = 5;
         }
-        ");
+        ",
+    );
     lexer.lex();
 
     let out = vec![

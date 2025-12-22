@@ -1,6 +1,7 @@
 use std::fmt::Display;
 pub mod expression;
 pub mod let_statement;
+pub mod return_statement;
 
 pub struct Ast {
     pub statements: Vec<Box<dyn Statement>>,
