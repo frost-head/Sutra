@@ -1,5 +1,7 @@
 use crate::{
-    ast::{Ast, expression::Expresion, let_statement::LetStatement},
+    ast::{
+        Ast, expression::Expresion, let_statement::LetStatement, return_statement::ReturnStatement,
+    },
     lexer::{
         Lexer,
         token::{Token, TokenKind},
@@ -33,6 +35,14 @@ impl<'a> Parser<'a> {
                 TokenKind::EOF => break,
                 TokenKind::LET => {
                     let st = self.parse_let_statement();
+                    let st = match st {
+                        Some(s) => s,
+                        None => panic!("Unknown Error"),
+                    };
+                    self.ast.statements.push(Box::new(st));
+                }
+                TokenKind::RETURN => {
+                    let st = self.parse_return_statement();
                     let st = match st {
                         Some(s) => s,
                         None => panic!("Unknown Error"),
@@ -82,6 +92,30 @@ impl<'a> Parser<'a> {
         }
 
         let statement = LetStatement::new(identifier, Expresion::new(exepresion));
+        return Some(statement);
+    }
+
+    pub fn parse_return_statement(&mut self) -> Option<ReturnStatement> {
+        let mut exepresion: Vec<Token> = Vec::new();
+        let peek: &Token = self.tokens.peek()?;
+        if peek.kind == TokenKind::RETURN {
+            self.tokens.next();
+        } else {
+            panic!("wrong token");
+        }
+
+        loop {
+            let cur: Token = self.tokens.next()?;
+            if cur.kind == TokenKind::SemiColon {
+                break;
+            } else if cur.kind == TokenKind::EOF {
+                panic!("wrong token");
+            } else {
+                exepresion.push(cur);
+            }
+        }
+
+        let statement = ReturnStatement::new(Expresion::new(exepresion));
         return Some(statement);
     }
 }
