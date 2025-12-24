@@ -1,11 +1,8 @@
+use anyhow::Result;
+
 use crate::{
-    ast::{
-        Ast, expression::Expresion, let_statement::LetStatement, return_statement::ReturnStatement,
-    },
-    lexer::{
-        Lexer,
-        token::{Token, TokenKind},
-    },
+    ast::{Ast, let_statement::LetStatement, return_statement::ReturnStatement},
+    lexer::{Lexer, errors::LexerError, token::TokenKind},
 };
 use std::iter::Peekable;
 
@@ -24,35 +21,28 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn parse(&mut self) {
-        loop {
-            let next = self.tokens.peek();
-            let next = match next {
-                Some(n) => n,
-                None => panic!("Unkown Token"),
-            };
+    pub fn parse(&mut self) -> Result<()> {
+        while let Some(next) = self.tokens.peek() {
             match next.kind {
                 TokenKind::EOF => break,
                 TokenKind::LET => {
-                    let st = LetStatement::parse_let_statement(self);
-                    let st = match st {
-                        Some(s) => s,
-                        None => panic!("Unknown Error"),
-                    };
+                    let st = LetStatement::parse_let_statement(self)
+                        .expect("Failed to parse let statement : ");
                     self.ast.statements.push(Box::new(st));
                 }
                 TokenKind::RETURN => {
-                    let st = ReturnStatement::parse_return_statement(self);
-                    let st = match st {
-                        Some(s) => s,
-                        None => panic!("Unknown Error"),
-                    };
+                    let st = ReturnStatement::parse_return_statement(self)
+                        .expect("Failed to parse return statement : ");
                     self.ast.statements.push(Box::new(st));
                 }
                 _ => {
-                    panic!("Wrong Token")
+                    return Err(LexerError::UnexpectedToken {
+                        token: next.clone(),
+                    }
+                    .into());
                 }
             }
         }
+        Ok(())
     }
 }

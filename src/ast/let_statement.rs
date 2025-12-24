@@ -1,9 +1,13 @@
 use super::Statement;
 use crate::{
     ast::expression::Expresion,
-    lexer::token::{Token, TokenKind},
+    lexer::{
+        errors::LexerError,
+        token::{Token, TokenKind},
+    },
     parser::Parser,
 };
+use anyhow::Result;
 use std::fmt::{self, Display};
 
 #[derive(Debug)]
@@ -22,43 +26,58 @@ impl LetStatement {
         }
     }
 
-    pub fn parse_let_statement(parser: &mut Parser) -> Option<LetStatement> {
+    pub fn parse_let_statement(parser: &mut Parser) -> Result<LetStatement> {
         let identifier: Token;
-        let mut exepresion: Vec<Token> = Vec::new();
-        let peek: &Token = parser.tokens.peek()?;
+        let mut expression: Vec<Token> = Vec::new();
+        let peek: &Token = parser.tokens.peek().unwrap();
         if peek.kind == TokenKind::LET {
             parser.tokens.next();
         } else {
-            panic!("wrong token");
+            return Err(LexerError::ExpectedTokenGotUnexpected {
+                kind: TokenKind::LET,
+                token: peek.clone(),
+            }
+            .into());
         }
 
-        let peek: &Token = parser.tokens.peek()?;
+        let peek: &Token = parser.tokens.peek().unwrap();
         if peek.kind == TokenKind::IDENT {
-            identifier = parser.tokens.next()?;
+            identifier = parser.tokens.next().unwrap();
         } else {
-            panic!("wrong token");
+            return Err(LexerError::ExpectedTokenGotUnexpected {
+                kind: TokenKind::IDENT,
+                token: peek.clone(),
+            }
+            .into());
         }
 
-        let peek: &Token = parser.tokens.peek()?;
+        let peek: &Token = parser.tokens.peek().unwrap();
         if peek.kind == TokenKind::Equal {
             parser.tokens.next();
         } else {
-            panic!("wrong token");
+            return Err(LexerError::ExpectedTokenGotUnexpected {
+                kind: TokenKind::Equal,
+                token: peek.clone(),
+            }
+            .into());
         }
 
         loop {
-            let cur: Token = parser.tokens.next()?;
+            let cur: Token = parser.tokens.next().unwrap();
             if cur.kind == TokenKind::SemiColon {
                 break;
             } else if cur.kind == TokenKind::EOF {
-                panic!("wrong token");
+                return Err(LexerError::UnexpectedToken {
+                    token: cur.clone(),
+                }
+                .into());
             } else {
-                exepresion.push(cur);
+                expression.push(cur);
             }
         }
 
-        let statement = LetStatement::new(identifier, Expresion::new(exepresion));
-        return Some(statement);
+        let statement = LetStatement::new(identifier, Expresion::new(expression));
+        return Ok(statement);
     }
 }
 

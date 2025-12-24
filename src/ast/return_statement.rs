@@ -1,8 +1,9 @@
-use crate::lexer::token::{Token, TokenKind};
-use crate::parser::Parser;
-
 use super::Statement;
 use super::expression::Expresion;
+use crate::lexer::errors::LexerError;
+use crate::lexer::token::{Token, TokenKind};
+use crate::parser::Parser;
+use anyhow::Result;
 use core::fmt;
 use std::fmt::Display;
 
@@ -17,28 +18,32 @@ impl ReturnStatement {
         ReturnStatement { value }
     }
 
-    pub fn parse_return_statement(parser: &mut Parser) -> Option<ReturnStatement> {
+    pub fn parse_return_statement(parser: &mut Parser) -> Result<ReturnStatement> {
         let mut exepresion: Vec<Token> = Vec::new();
-        let peek: &Token = parser.tokens.peek()?;
+        let peek: &Token = parser.tokens.peek().unwrap();
         if peek.kind == TokenKind::RETURN {
             parser.tokens.next();
         } else {
-            panic!("wrong token");
+            return Err(LexerError::ExpectedTokenGotUnexpected {
+                kind: TokenKind::RETURN,
+                token: peek.clone(),
+            }
+            .into());
         }
 
         loop {
-            let cur: Token = parser.tokens.next()?;
+            let cur: Token = parser.tokens.next().unwrap();
             if cur.kind == TokenKind::SemiColon {
                 break;
             } else if cur.kind == TokenKind::EOF {
-                panic!("wrong token");
+                return Err(LexerError::UnexpectedEndOfInput.into());
             } else {
                 exepresion.push(cur);
             }
         }
 
         let statement = ReturnStatement::new(Expresion::new(exepresion));
-        return Some(statement);
+        return Ok(statement);
     }
 }
 
