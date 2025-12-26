@@ -1,10 +1,8 @@
 use super::Statement;
+use crate::errors::LexerError;
 use crate::{
     ast::expression::Expresion,
-    lexer::{
-        errors::LexerError,
-        token::{Token, TokenKind},
-    },
+    lexer::token::{Token, TokenKind},
     parser::Parser,
 };
 use anyhow::Result;
@@ -67,10 +65,7 @@ impl LetStatement {
             if cur.kind == TokenKind::SemiColon {
                 break;
             } else if cur.kind == TokenKind::EOF {
-                return Err(LexerError::UnexpectedToken {
-                    token: cur.clone(),
-                }
-                .into());
+                return Err(LexerError::UnexpectedToken { token: cur.clone() }.into());
             } else {
                 expression.push(cur);
             }

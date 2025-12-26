@@ -4,7 +4,7 @@ use sutra::parser::Parser;
 fn main() {
     let inp: &str = "let x = 5; let y = 6;
     let z=2*4*5;
-    return x + y
+    return x + y;
     ";
     let lexer = Lexer::new(inp);
 

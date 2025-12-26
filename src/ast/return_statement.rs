@@ -1,6 +1,6 @@
 use super::Statement;
 use super::expression::Expresion;
-use crate::lexer::errors::LexerError;
+use crate::errors::LexerError;
 use crate::lexer::token::{Token, TokenKind};
 use crate::parser::Parser;
 use anyhow::Result;

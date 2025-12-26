@@ -2,8 +2,9 @@ use anyhow::Result;
 
 use crate::{
     ast::{Ast, let_statement::LetStatement, return_statement::ReturnStatement},
-    lexer::{Lexer, errors::LexerError, token::TokenKind},
+    lexer::{Lexer, token::TokenKind},
 };
+use crate::errors::LexerError;
 use std::iter::Peekable;
 
 pub struct Parser<'a> {

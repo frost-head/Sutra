@@ -1,13 +1,11 @@
 use anyhow::{Ok, Result};
 
 use crate::lexer::{
-    self,
-    errors::LexerError,
     token::{Token, TokenKind},
 };
+use crate::errors::LexerError;
 use std::{iter::Peekable, str::Chars};
 
-pub mod errors;
 #[cfg(test)]
 mod tests;
 pub mod token;
