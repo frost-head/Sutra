@@ -1,11 +1,14 @@
 use anyhow::Result;
 
+use crate::ast::block::{Block, Stmt};
+use crate::ast::item::{FuncItem, Item};
+use crate::errors::LexerError;
 use crate::{
     ast::{Ast, let_statement::LetStatement, return_statement::ReturnStatement},
     lexer::{Lexer, token::TokenKind},
 };
-use crate::errors::LexerError;
 use std::iter::Peekable;
+use std::vec;
 
 pub struct Parser<'a> {
     pub tokens: Peekable<Lexer<'a>>,
@@ -17,7 +20,13 @@ impl<'a> Parser<'a> {
         Parser {
             tokens: lexer.peekable(),
             ast: Ast {
-                statements: Vec::new(),
+                items: vec![Item::Function(FuncItem {
+                    name: String::from("main"),
+                    params: None,
+                    body: Block {
+                        statements: Vec::new(),
+                    },
+                })],
             },
         }
     }
@@ -27,14 +36,16 @@ impl<'a> Parser<'a> {
             match next.kind {
                 TokenKind::EOF => break,
                 TokenKind::LET => {
-                    let st = LetStatement::parse_let_statement(self)
-                        .expect("Failed to parse let statement : ");
-                    self.ast.statements.push(Box::new(st));
+                    let st = Stmt::LetStmt(LetStatement::parse_let_statement(self)?);
+                    if let Item::Function(func_item) = &mut self.ast.items[0] {
+                        func_item.body.statements.push(st);
+                    }
                 }
                 TokenKind::RETURN => {
-                    let st = ReturnStatement::parse_return_statement(self)
-                        .expect("Failed to parse return statement : ");
-                    self.ast.statements.push(Box::new(st));
+                    let st = Stmt::ReturnStmt(ReturnStatement::parse_return_statement(self)?);
+                    if let Item::Function(func_item) = &mut self.ast.items[0] {
+                        func_item.body.statements.push(st);
+                    }
                 }
                 _ => {
                     return Err(LexerError::UnexpectedToken {

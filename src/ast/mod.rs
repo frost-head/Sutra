@@ -1,12 +1,11 @@
-use std::fmt::Display;
+use crate::ast::item::Item;
+pub mod block;
 pub mod expression;
+pub mod item;
 pub mod let_statement;
 pub mod return_statement;
 
-pub struct Ast {
-    pub statements: Vec<Box<dyn Statement>>,
-}
 
-pub trait Statement: Display {
-    fn statement(&self) {}
+pub struct Ast {
+    pub items: Vec<Item>,
 }

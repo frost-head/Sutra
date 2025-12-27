@@ -9,12 +9,27 @@ fn main() {
     let lexer = Lexer::new(inp);
 
     let mut parser = Parser::new(lexer);
-    parser.parse().unwrap_or_else(|err| {
+    if let Err(err) = parser.parse() {
         eprintln!("Error occured while parsing the input: {}", err);
         std::process::exit(1);
-    });
+    }
 
-    for s in parser.ast.statements.iter() {
-        println!("{}", s);
+    match &parser.ast.items[0] {
+        sutra::ast::item::Item::Function(func_item) => {
+            for s in func_item.body.statements.iter() {
+                match s {
+                    sutra::ast::block::Stmt::LetStmt(let_statement) => {
+                        println!("{}", let_statement)
+                    }
+                    sutra::ast::block::Stmt::ReturnStmt(return_statement) => {
+                        println!("{}", return_statement)
+                    }
+                };
+            }
+        }
+        sutra::ast::item::Item::Struct() => {
+            eprintln!("Error occured while parsing the input");
+            std::process::exit(1);
+        }
     }
 }

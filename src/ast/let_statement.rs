@@ -1,4 +1,3 @@
-use super::Statement;
 use crate::errors::LexerError;
 use crate::{
     ast::expression::Expresion,
@@ -14,7 +13,6 @@ pub struct LetStatement {
     pub(crate) value: Expresion,
 }
 
-impl Statement for LetStatement {}
 
 impl LetStatement {
     pub fn new(identifier: Token, value: Expresion) -> LetStatement {

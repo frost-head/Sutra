@@ -1,4 +1,3 @@
-use super::Statement;
 use super::expression::Expresion;
 use crate::errors::LexerError;
 use crate::lexer::token::{Token, TokenKind};
@@ -10,8 +9,6 @@ use std::fmt::Display;
 pub struct ReturnStatement {
     pub value: Expresion,
 }
-
-impl Statement for ReturnStatement {}
 
 impl ReturnStatement {
     pub fn new(value: Expresion) -> Self {
