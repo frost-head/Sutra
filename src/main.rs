@@ -1,7 +1,7 @@
 use std::fs;
 
-use sutra::lexer::Lexer;
 use sutra::parser::Parser;
+use sutra::{ast::item::Item, lexer::Lexer};
 
 use clap::{Arg, Command};
 
@@ -16,23 +16,16 @@ fn main() {
         std::process::exit(1);
     }
 
-    match &parser.ast.items[0] {
-        sutra::ast::item::Item::Function(func_item) => {
-            for s in func_item.body.statements.iter() {
-                match s {
-                    sutra::ast::block::Stmt::LetStmt(let_statement) => {
-                        println!("{}", let_statement)
-                    }
-                    sutra::ast::block::Stmt::ReturnStmt(return_statement) => {
-                        println!("{}", return_statement)
-                    }
-                };
+    for item in &parser.ast.items {
+        match item {
+            Item::Function(func_item) => {
+                println!("{}", func_item);
             }
-        }
-        sutra::ast::item::Item::Struct() => {
-            eprintln!("Error occured while parsing the input");
-            std::process::exit(1);
-        }
+            Item::Struct() => {
+                eprintln!("Error occured while parsing the input");
+                std::process::exit(1);
+            }
+    }
     }
 }
 

@@ -6,6 +6,7 @@ use anyhow::Result;
 use core::fmt;
 use std::fmt::Display;
 
+#[derive(Debug)]
 pub struct ReturnStatement {
     pub value: Expresion,
 }
@@ -15,7 +16,7 @@ impl ReturnStatement {
         ReturnStatement { value }
     }
 
-    pub fn parse_return_statement(parser: &mut Parser) -> Result<ReturnStatement> {
+    pub fn parse(parser: &mut Parser) -> Result<ReturnStatement> {
         let mut exepresion: Vec<Token> = Vec::new();
         let peek: &Token = parser.tokens.peek().unwrap();
         if peek.kind == TokenKind::RETURN {

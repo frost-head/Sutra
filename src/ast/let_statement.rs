@@ -21,7 +21,7 @@ impl LetStatement {
         }
     }
 
-    pub fn parse_let_statement(parser: &mut Parser) -> Result<LetStatement> {
+    pub fn parse(parser: &mut Parser) -> Result<LetStatement> {
         let identifier: Token;
         let mut expression: Vec<Token> = Vec::new();
         let peek: &Token = parser.tokens.peek().unwrap();

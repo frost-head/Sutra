@@ -1,12 +1,8 @@
-use crate::{ast::block::Block, lexer::token::Token};
+use crate::ast::item::function::FuncItem;
+
+pub mod function;
 
 pub enum Item {
     Function(FuncItem),
     Struct(),
-}
-
-pub struct FuncItem {
-    pub name: String,
-    pub params: Option<Vec<Token>>,
-    pub body: Block,
 }

@@ -1,6 +1,10 @@
-let abc = 5*2;
-return abc;
+func main() {
+    let x = 5;
+    let y = 10;
+    return x + y;
+}
 
-let def = abc + 3;
-let ghi = def * 2;
-return ghi;
+
+func add() {
+    return a + b;
+}
