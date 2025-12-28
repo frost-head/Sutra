@@ -1,12 +1,14 @@
+use std::fs;
+
 use sutra::lexer::Lexer;
 use sutra::parser::Parser;
 
+use clap::{Arg, Command};
+
 fn main() {
-    let inp: &str = "let x = 5; let y = 6;
-    let z=2*4*5;
-    return x + y;
-    ";
-    let lexer = Lexer::new(inp);
+    let content = read_file();
+
+    let lexer = Lexer::new(&content);
 
     let mut parser = Parser::new(lexer);
     if let Err(err) = parser.parse() {
@@ -32,4 +34,15 @@ fn main() {
             std::process::exit(1);
         }
     }
+}
+
+fn read_file() -> String {
+    let matches = Command::new("app")
+        .arg(Arg::new("file").required(true))
+        .get_matches();
+
+    let file = matches.get_one::<String>("file").unwrap();
+    println!("{}", file);
+    let content = fs::read_to_string(file).expect("failed to read file");
+    content
 }

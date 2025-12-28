@@ -1,0 +1,6 @@
+let abc = 5*2;
+return abc;
+
+let def = abc + 3;
+let ghi = def * 2;
+return ghi;
