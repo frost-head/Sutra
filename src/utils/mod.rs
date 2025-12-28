@@ -1,5 +1,3 @@
-use std::fmt::{self, Write};
-
 pub fn indent_multiline(s: &str, indent: &str) -> String {
     s.lines()
         .map(|line| format!("{indent}{line}"))
