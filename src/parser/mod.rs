@@ -2,7 +2,7 @@ use anyhow::Result;
 
 use crate::ast::block::{Block, Stmt};
 use crate::ast::item::{FuncItem, Item};
-use crate::errors::LexerError;
+use crate::errors::ParserError;
 use crate::{
     ast::{Ast, let_statement::LetStatement, return_statement::ReturnStatement},
     lexer::{Lexer, token::TokenKind},
@@ -35,6 +35,7 @@ impl<'a> Parser<'a> {
         while let Some(next) = self.tokens.peek() {
             match next.kind {
                 TokenKind::EOF => break,
+                TokenKind::FUNC => {}
                 TokenKind::LET => {
                     let st = Stmt::LetStmt(LetStatement::parse_let_statement(self)?);
                     if let Item::Function(func_item) = &mut self.ast.items[0] {
@@ -48,7 +49,7 @@ impl<'a> Parser<'a> {
                     }
                 }
                 _ => {
-                    return Err(LexerError::UnexpectedToken {
+                    return Err(ParserError::UnexpectedToken {
                         token: next.clone(),
                     }
                     .into());

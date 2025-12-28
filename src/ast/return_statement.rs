@@ -1,5 +1,5 @@
 use super::expression::Expresion;
-use crate::errors::LexerError;
+use crate::errors::ParserError;
 use crate::lexer::token::{Token, TokenKind};
 use crate::parser::Parser;
 use anyhow::Result;
@@ -21,7 +21,7 @@ impl ReturnStatement {
         if peek.kind == TokenKind::RETURN {
             parser.tokens.next();
         } else {
-            return Err(LexerError::ExpectedTokenGotUnexpected {
+            return Err(ParserError::ExpectedTokenGotUnexpected {
                 kind: TokenKind::RETURN,
                 token: peek.clone(),
             }
@@ -33,7 +33,7 @@ impl ReturnStatement {
             if cur.kind == TokenKind::SemiColon {
                 break;
             } else if cur.kind == TokenKind::EOF {
-                return Err(LexerError::UnexpectedEndOfInput.into());
+                return Err(ParserError::UnexpectedEndOfInput.into());
             } else {
                 exepresion.push(cur);
             }

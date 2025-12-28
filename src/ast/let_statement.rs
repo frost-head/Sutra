@@ -1,4 +1,4 @@
-use crate::errors::LexerError;
+use crate::errors::ParserError;
 use crate::{
     ast::expression::Expresion,
     lexer::token::{Token, TokenKind},
@@ -12,7 +12,6 @@ pub struct LetStatement {
     pub(crate) identifier: Token,
     pub(crate) value: Expresion,
 }
-
 
 impl LetStatement {
     pub fn new(identifier: Token, value: Expresion) -> LetStatement {
@@ -29,7 +28,7 @@ impl LetStatement {
         if peek.kind == TokenKind::LET {
             parser.tokens.next();
         } else {
-            return Err(LexerError::ExpectedTokenGotUnexpected {
+            return Err(ParserError::ExpectedTokenGotUnexpected {
                 kind: TokenKind::LET,
                 token: peek.clone(),
             }
@@ -40,7 +39,7 @@ impl LetStatement {
         if peek.kind == TokenKind::IDENT {
             identifier = parser.tokens.next().unwrap();
         } else {
-            return Err(LexerError::ExpectedTokenGotUnexpected {
+            return Err(ParserError::ExpectedTokenGotUnexpected {
                 kind: TokenKind::IDENT,
                 token: peek.clone(),
             }
@@ -51,7 +50,7 @@ impl LetStatement {
         if peek.kind == TokenKind::Equal {
             parser.tokens.next();
         } else {
-            return Err(LexerError::ExpectedTokenGotUnexpected {
+            return Err(ParserError::ExpectedTokenGotUnexpected {
                 kind: TokenKind::Equal,
                 token: peek.clone(),
             }
@@ -63,7 +62,7 @@ impl LetStatement {
             if cur.kind == TokenKind::SemiColon {
                 break;
             } else if cur.kind == TokenKind::EOF {
-                return Err(LexerError::UnexpectedToken { token: cur.clone() }.into());
+                return Err(ParserError::UnexpectedToken { token: cur.clone() }.into());
             } else {
                 expression.push(cur);
             }
