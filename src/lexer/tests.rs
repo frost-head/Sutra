@@ -9,7 +9,7 @@ fn first_token() {
         None => panic!("Unexpected end of input"),
     };
     println!("Printing token :: {:?}", tok);
-    let perfect = Token::new(TokenKind::LeftParen, String::from("("));
+    let perfect = Token::Punctuation(PuncuationKind::LeftParen);
 
     println!("Printing perfect token :: {:?}", perfect);
     assert_eq!(tok, perfect);
@@ -26,7 +26,7 @@ fn second_token() {
     };
     println!("Printing token :: {:?}", tok);
 
-    let perfect = Token::new(TokenKind::RightParen, String::from(")"));
+    let perfect = Token::Punctuation(PuncuationKind::RightParen);
 
     println!("Printing perfect token :: {:?}", perfect);
     assert_eq!(tok, perfect);
@@ -38,13 +38,13 @@ fn all_tokens() {
     lexer.lex();
 
     let out = vec![
-        Token::new(TokenKind::LeftParen, String::from("(")),
-        Token::new(TokenKind::RightParen, String::from(")")),
-        Token::new(TokenKind::LeftSquareParen, String::from("[")),
-        Token::new(TokenKind::RightSquareParen, String::from("]")),
-        Token::new(TokenKind::LeftCurlyParen, String::from("{")),
-        Token::new(TokenKind::RightCurlyParen, String::from("}")),
-        Token::new(TokenKind::EOF, String::from("EOF")),
+        Token::Punctuation(PuncuationKind::LeftParen),
+        Token::Punctuation(PuncuationKind::RightParen),
+        Token::Punctuation(PuncuationKind::LeftSquareParen),
+        Token::Punctuation(PuncuationKind::RightSquareParen),
+        Token::Punctuation(PuncuationKind::LeftCurlyParen),
+        Token::Punctuation(PuncuationKind::RightCurlyParen),
+        Token::EOF,
     ];
 
     assert_eq!(lexer.output, out);
@@ -62,18 +62,18 @@ fn func() {
     lexer.lex();
 
     let out = vec![
-        Token::new(TokenKind::FUNC, String::from("func")),
-        Token::new(TokenKind::IDENT, String::from("main")),
-        Token::new(TokenKind::LeftParen, String::from("(")),
-        Token::new(TokenKind::RightParen, String::from(")")),
-        Token::new(TokenKind::LeftCurlyParen, String::from("{")),
-        Token::new(TokenKind::LET, String::from("let")),
-        Token::new(TokenKind::IDENT, String::from("x")),
-        Token::new(TokenKind::Equal, String::from("=")),
-        Token::new(TokenKind::INT, String::from("5")),
-        Token::new(TokenKind::SemiColon, String::from(";")),
-        Token::new(TokenKind::RightCurlyParen, String::from("}")),
-        Token::new(TokenKind::EOF, String::from("EOF")),
+        Token::Keyword(KeywordKind::Func),
+        Token::Ident("main".to_string()),
+        Token::Punctuation(PuncuationKind::LeftParen),
+        Token::Punctuation(PuncuationKind::RightParen),
+        Token::Punctuation(PuncuationKind::LeftCurlyParen),
+        Token::Keyword(KeywordKind::Let),
+        Token::Ident("x".to_string()),
+        Token::Operator(OperatorKind::Equal),
+        Token::Number(5),
+        Token::Punctuation(PuncuationKind::SemiColon),
+        Token::Punctuation(PuncuationKind::RightCurlyParen),
+        Token::EOF,
     ];
 
     assert_eq!(lexer.output, out);

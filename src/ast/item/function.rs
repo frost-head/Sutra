@@ -5,7 +5,7 @@ use anyhow::Result;
 use crate::{
     ast::block::Block,
     errors::ParserError,
-    lexer::token::{Token, TokenKind},
+    lexer::token::{KeywordKind, PuncuationKind, Token},
     parser::Parser,
     utils::indent_multiline,
 };
@@ -24,61 +24,68 @@ impl FuncItem {
     pub fn parse(parser: &mut Parser) -> Result<FuncItem> {
         let name: String;
         let next = parser.tokens.peek().unwrap();
-        if next.kind != TokenKind::FUNC {
-            return Err(ParserError::UnexpectedEndOfInput.into());
-        } else {
-            parser.tokens.next().unwrap();
+        match next {
+            Token::Keyword(KeywordKind::Func) => parser.tokens.next().unwrap(),
+            _ => return Err(ParserError::UnexpectedEndOfInput.into()),
+        };
+        let next = parser.tokens.peek().unwrap();
+        match next {
+            Token::Ident(id) => {
+                name = id.clone();
+                parser.tokens.next().unwrap();
+            }
+            _ => {
+                return Err(ParserError::UnexpectedToken {
+                    token: next.clone(),
+                }
+                .into());
+            }
         }
         let next = parser.tokens.peek().unwrap();
-        if next.kind != TokenKind::IDENT {
-            return Err(ParserError::UnexpectedToken {
-                token: next.clone(),
+        match next {
+            Token::Punctuation(PuncuationKind::LeftParen) => parser.tokens.next().unwrap(),
+            _ => {
+                return Err(ParserError::UnexpectedToken {
+                    token: next.clone(),
+                }
+                .into());
             }
-            .into());
-        } else {
-            let next = parser.tokens.next().unwrap();
-            name = next.literal.clone();
-        }
-
-        let next = parser.tokens.next().unwrap();
-        if next.kind != TokenKind::LeftParen {
-            return Err(ParserError::UnexpectedToken {
-                token: next.clone(),
-            }
-            .into());
-        }
-
+        };
         let next = parser.tokens.peek().unwrap();
-        if next.kind != TokenKind::RightParen {
-            return Err(ParserError::UnexpectedToken {
-                token: next.clone(),
+        match next {
+            Token::Punctuation(PuncuationKind::RightParen) => parser.tokens.next().unwrap(),
+            _ => {
+                return Err(ParserError::UnexpectedToken {
+                    token: next.clone(),
+                }
+                .into());
             }
-            .into());
-        } else {
-            parser.tokens.next().unwrap();
-        }
+        };
+        let next = parser.tokens.peek().unwrap();
+        match next {
+            Token::Punctuation(PuncuationKind::LeftCurlyParen) => parser.tokens.next().unwrap(),
+            _ => {
+                return Err(ParserError::UnexpectedToken {
+                    token: next.clone(),
+                }
+                .into());
+            }
+        };
 
         let params: Option<Vec<Token>> = None;
-
-        let next = parser.tokens.next().unwrap();
-        if next.kind != TokenKind::LeftCurlyParen {
-            return Err(ParserError::UnexpectedToken {
-                token: next.clone(),
-            }
-            .into());
-        }
 
         let body = Block::parse(parser).expect("Error while parsing function body");
 
         let next = parser.tokens.peek().unwrap();
-        if next.kind != TokenKind::RightCurlyParen {
-            return Err(ParserError::UnexpectedToken {
-                token: next.clone(),
+        match next {
+            Token::Punctuation(PuncuationKind::RightCurlyParen) => parser.tokens.next().unwrap(),
+            _ => {
+                return Err(ParserError::UnexpectedToken {
+                    token: next.clone(),
+                }
+                .into());
             }
-            .into());
-        } else {
-            parser.tokens.next().unwrap();
-        }
+        };
 
         Ok(FuncItem { name, params, body })
     }
