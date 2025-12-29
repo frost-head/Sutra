@@ -25,7 +25,7 @@ fn main() {
                 eprintln!("Error occured while parsing the input");
                 std::process::exit(1);
             }
-    }
+        }
     }
 }
 

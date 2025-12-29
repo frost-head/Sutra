@@ -1,5 +1,5 @@
-use core::fmt;
 use anyhow::Result;
+use core::fmt;
 
 use crate::{
     ast::{let_statement::LetStatement, return_statement::ReturnStatement},
@@ -30,7 +30,6 @@ impl Block {
                     statements.push(st);
                 }
                 TokenKind::RightCurlyParen => {
-                    parser.tokens.next();
                     return Ok(Block::new(statements));
                 }
                 _ => {

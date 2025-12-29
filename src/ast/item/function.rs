@@ -6,7 +6,8 @@ use crate::{
     ast::block::Block,
     errors::ParserError,
     lexer::token::{Token, TokenKind},
-    parser::Parser, utils::indent_multiline,
+    parser::Parser,
+    utils::indent_multiline,
 };
 
 pub struct FuncItem {
@@ -21,18 +22,23 @@ impl FuncItem {
     }
 
     pub fn parse(parser: &mut Parser) -> Result<FuncItem> {
-        let next = parser.tokens.next().unwrap();
+        let name: String;
+        let next = parser.tokens.peek().unwrap();
         if next.kind != TokenKind::FUNC {
             return Err(ParserError::UnexpectedEndOfInput.into());
+        } else {
+            parser.tokens.next().unwrap();
         }
-        let name = parser.tokens.next().unwrap();
-        if name.kind != TokenKind::IDENT {
+        let next = parser.tokens.peek().unwrap();
+        if next.kind != TokenKind::IDENT {
             return Err(ParserError::UnexpectedToken {
-                token: name.clone(),
+                token: next.clone(),
             }
             .into());
+        } else {
+            let next = parser.tokens.next().unwrap();
+            name = next.literal.clone();
         }
-        let name = name.literal.clone();
 
         let next = parser.tokens.next().unwrap();
         if next.kind != TokenKind::LeftParen {
@@ -42,12 +48,14 @@ impl FuncItem {
             .into());
         }
 
-        let next = parser.tokens.next().unwrap();
+        let next = parser.tokens.peek().unwrap();
         if next.kind != TokenKind::RightParen {
             return Err(ParserError::UnexpectedToken {
                 token: next.clone(),
             }
             .into());
+        } else {
+            parser.tokens.next().unwrap();
         }
 
         let params: Option<Vec<Token>> = None;
@@ -61,7 +69,16 @@ impl FuncItem {
         }
 
         let body = Block::parse(parser).expect("Error while parsing function body");
-        println!("Function body parsed successfully");
+
+        let next = parser.tokens.peek().unwrap();
+        if next.kind != TokenKind::RightCurlyParen {
+            return Err(ParserError::UnexpectedToken {
+                token: next.clone(),
+            }
+            .into());
+        } else {
+            parser.tokens.next().unwrap();
+        }
 
         Ok(FuncItem { name, params, body })
     }
