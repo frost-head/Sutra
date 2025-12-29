@@ -4,7 +4,7 @@ use core::fmt;
 use crate::{
     ast::{let_statement::LetStatement, return_statement::ReturnStatement},
     errors::ParserError,
-    lexer::token::TokenKind,
+    lexer::token::{KeywordKind, PuncuationKind, Token},
     parser::Parser,
 };
 
@@ -20,16 +20,16 @@ impl Block {
     pub fn parse(parser: &mut Parser) -> Result<Block> {
         let mut statements = Vec::new();
         while let Some(next) = parser.tokens.peek() {
-            match next.kind {
-                TokenKind::LET => {
+            match next {
+                Token::Keyword(KeywordKind::Let) => {
                     let st = Stmt::LetStmt(LetStatement::parse(parser)?);
                     statements.push(st);
                 }
-                TokenKind::RETURN => {
+                Token::Keyword(KeywordKind::Return) => {
                     let st = Stmt::ReturnStmt(ReturnStatement::parse(parser)?);
                     statements.push(st);
                 }
-                TokenKind::RightCurlyParen => {
+                Token::Punctuation(PuncuationKind::RightCurlyParen) => {
                     return Ok(Block::new(statements));
                 }
                 _ => {

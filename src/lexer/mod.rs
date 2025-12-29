@@ -1,7 +1,10 @@
 use anyhow::{Ok, Result};
 
-use crate::errors::LexerError;
-use crate::lexer::token::{Token, TokenKind};
+use crate::lexer::token::{OperatorKind, Token};
+use crate::{
+    errors::LexerError,
+    lexer::token::{KeywordKind, PuncuationKind},
+};
 use std::{iter::Peekable, str::Chars};
 
 #[cfg(test)]
@@ -25,9 +28,8 @@ impl<'a> Lexer<'a> {
 
     pub fn lex(&mut self) {
         while let Some(tok) = self.next() {
-            if tok.kind == TokenKind::EOF {
-                self.output
-                    .push(Token::new(TokenKind::EOF, String::from("EOF")));
+            if tok == Token::EOF {
+                self.output.push(Token::EOF);
                 break;
             } else {
                 self.output.push(tok);
@@ -45,20 +47,20 @@ impl<'a> Lexer<'a> {
                 break;
             }
         }
-        Ok(Token::new(TokenKind::INT, number))
+        Ok(Token::Number(number.parse().unwrap()))
     }
 
-    fn match_keyword(&mut self, indent: &str) -> Token {
-        match indent {
-            "if" => Token::new(TokenKind::IF, "if".to_string()),
-            "else" => Token::new(TokenKind::ELSE, "else".to_string()),
-            "while" => Token::new(TokenKind::WHILE, "while".to_string()),
-            "for" => Token::new(TokenKind::FOR, "for".to_string()),
-            "return" => Token::new(TokenKind::RETURN, "return".to_string()),
-            "func" => Token::new(TokenKind::FUNC, "func".to_string()),
-            "struct" => Token::new(TokenKind::STRUCT, "struct".to_string()),
-            "let" => Token::new(TokenKind::LET, "let".to_string()),
-            _ => Token::new(TokenKind::IDENT, indent.to_string()),
+    fn match_keyword(&mut self, ident: &str) -> Token {
+        match ident {
+            "if" => Token::Keyword(KeywordKind::If),
+            "else" => Token::Keyword(KeywordKind::Else),
+            "while" => Token::Keyword(KeywordKind::While),
+            "for" => Token::Keyword(KeywordKind::For),
+            "return" => Token::Keyword(KeywordKind::Return),
+            "func" => Token::Keyword(KeywordKind::Func),
+            "struct" => Token::Keyword(KeywordKind::Struct),
+            "let" => Token::Keyword(KeywordKind::Let),
+            _ => Token::Ident(ident.to_string()),
         }
     }
 
@@ -94,30 +96,30 @@ impl Iterator for Lexer<'_> {
         let mut do_next: bool = true;
         let c = match self.chars.peek() {
             Some(c) => c,
-            None => return Some(Token::new(TokenKind::EOF, String::from("EOF"))),
+            None => return Some(Token::EOF),
         };
         let tok: Result<Token> = match *c {
-            '(' => Ok(Token::new(TokenKind::LeftParen, c.to_string())),
-            ')' => Ok(Token::new(TokenKind::RightParen, c.to_string())),
-            '{' => Ok(Token::new(TokenKind::LeftCurlyParen, c.to_string())),
-            '}' => Ok(Token::new(TokenKind::RightCurlyParen, c.to_string())),
-            '[' => Ok(Token::new(TokenKind::LeftSquareParen, c.to_string())),
-            ']' => Ok(Token::new(TokenKind::RightSquareParen, c.to_string())),
-            '<' => Ok(Token::new(TokenKind::LeftAngleParen, c.to_string())),
-            '>' => Ok(Token::new(TokenKind::RightAngleParen, c.to_string())),
-            ':' => Ok(Token::new(TokenKind::Colon, c.to_string())),
-            ';' => Ok(Token::new(TokenKind::SemiColon, c.to_string())),
-            ',' => Ok(Token::new(TokenKind::Comma, c.to_string())),
-            '=' => Ok(Token::new(TokenKind::Equal, c.to_string())),
-            '+' => Ok(Token::new(TokenKind::Plus, c.to_string())),
-            '-' => Ok(Token::new(TokenKind::Minus, c.to_string())),
-            '*' => Ok(Token::new(TokenKind::Star, c.to_string())),
-            '/' => Ok(Token::new(TokenKind::Slash, c.to_string())),
-            '%' => Ok(Token::new(TokenKind::Percent, c.to_string())),
+            '(' => Ok(Token::Punctuation(PuncuationKind::LeftParen)),
+            ')' => Ok(Token::Punctuation(PuncuationKind::RightParen)),
+            '{' => Ok(Token::Punctuation(PuncuationKind::LeftCurlyParen)),
+            '}' => Ok(Token::Punctuation(PuncuationKind::RightCurlyParen)),
+            '[' => Ok(Token::Punctuation(PuncuationKind::LeftSquareParen)),
+            ']' => Ok(Token::Punctuation(PuncuationKind::RightSquareParen)),
+            '<' => Ok(Token::Punctuation(PuncuationKind::LeftAngleParen)),
+            '>' => Ok(Token::Punctuation(PuncuationKind::RightAngleParen)),
+            ':' => Ok(Token::Punctuation(PuncuationKind::Colon)),
+            ';' => Ok(Token::Punctuation(PuncuationKind::SemiColon)),
+            ',' => Ok(Token::Punctuation(PuncuationKind::Comma)),
+            '=' => Ok(Token::Operator(OperatorKind::Equal)),
+            '+' => Ok(Token::Operator(OperatorKind::Plus)),
+            '-' => Ok(Token::Operator(OperatorKind::Minus)),
+            '*' => Ok(Token::Operator(OperatorKind::Star)),
+            '/' => Ok(Token::Operator(OperatorKind::Slash)),
+            '%' => Ok(Token::Operator(OperatorKind::Percent)),
             _ => {
                 if c.is_alphabetic() {
                     do_next = false; // read_identifier performs self.chars.next() to stop doing it twice we need this flag
-                    Ok(self.read_identifier().expect("failed to read indentifier"))
+                    Ok(self.read_identifier().expect("failed to read identifier"))
                 } else if c.is_numeric() {
                     do_next = false; // read_identifier performs self.chars.next() to stop doing it twice we need this flag
                     Ok(self.read_number().expect("failed to read number"))
