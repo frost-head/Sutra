@@ -28,7 +28,7 @@ impl LetStatement {
             .into());
         }
 
-        if let Token::Ident(id) = parser.tokens.peek().unwrap() {
+        if let Token::Ident(_id) = parser.tokens.peek().unwrap() {
             identifier = parser.tokens.next().unwrap();
         } else {
             return Err(ParserError::ExpectedTokenGotUnexpected {

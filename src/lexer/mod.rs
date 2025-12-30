@@ -12,7 +12,6 @@ mod tests;
 pub mod token;
 
 pub struct Lexer<'a> {
-    input: &'a str,
     chars: Peekable<Chars<'a>>,
     pub output: Vec<Token>,
 }
@@ -20,7 +19,6 @@ pub struct Lexer<'a> {
 impl<'a> Lexer<'a> {
     pub fn new(input: &'a str) -> Lexer<'a> {
         Lexer {
-            input: input,
             chars: input.chars().peekable(),
             output: Vec::new(),
         }
