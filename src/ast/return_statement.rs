@@ -1,4 +1,4 @@
-use super::expression::Expresion;
+use crate::ast::expression::Expression;
 use crate::errors::ParserError;
 use crate::lexer::token::{KeywordKind, Token};
 use crate::parser::Parser;
@@ -8,16 +8,16 @@ use std::fmt::Display;
 
 #[derive(Debug)]
 pub struct ReturnStatement {
-    pub value: Expresion,
+    pub value: Expression,
 }
 
 impl ReturnStatement {
-    pub fn new(value: Expresion) -> Self {
+    pub fn new(value: Expression) -> Self {
         ReturnStatement { value }
     }
 
     pub fn parse(parser: &mut Parser) -> Result<ReturnStatement> {
-        let mut exepresion: Vec<Token> = Vec::new();
+        let expression: Expression;
         let peek: &Token = parser.tokens.peek().unwrap();
         if *peek == Token::Keyword(KeywordKind::Return) {
             parser.tokens.next();
@@ -29,18 +29,8 @@ impl ReturnStatement {
             .into());
         }
 
-        loop {
-            let cur: Token = parser.tokens.next().unwrap();
-            if cur == Token::Punctuation(crate::lexer::token::PuncuationKind::SemiColon) {
-                break;
-            } else if cur == Token::EOF {
-                return Err(ParserError::UnexpectedEndOfInput.into());
-            } else {
-                exepresion.push(cur);
-            }
-        }
-
-        let statement = ReturnStatement::new(Expresion::new(exepresion));
+        expression = Expression::parse(parser).unwrap();
+        let statement = ReturnStatement::new(expression);
         return Ok(statement);
     }
 }

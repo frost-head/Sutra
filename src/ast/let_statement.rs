@@ -1,23 +1,23 @@
 use crate::errors::ParserError;
 use crate::lexer::token::{KeywordKind, OperatorKind, PuncuationKind};
-use crate::{ast::expression::Expresion, lexer::token::Token, parser::Parser};
+use crate::{ast::expression::Expression, lexer::token::Token, parser::Parser};
 use anyhow::Result;
 use std::fmt::{self, Display};
 
 #[derive(Debug)]
 pub struct LetStatement {
     pub(crate) identifier: Token,
-    pub(crate) value: Expresion,
+    pub(crate) value: Expression,
 }
 
 impl LetStatement {
-    pub fn new(identifier: Token, value: Expresion) -> LetStatement {
+    pub fn new(identifier: Token, value: Expression) -> LetStatement {
         LetStatement { identifier, value }
     }
 
     pub fn parse(parser: &mut Parser) -> Result<LetStatement> {
         let identifier: Token;
-        let mut expression: Vec<Token> = Vec::new();
+        let expression: Expression;
         if parser.tokens.peek().unwrap() == &Token::Keyword(KeywordKind::Let) {
             parser.tokens.next().unwrap();
         } else {
@@ -48,18 +48,8 @@ impl LetStatement {
             .into());
         }
 
-        loop {
-            let cur = parser.tokens.next().unwrap();
-            if cur == Token::Punctuation(PuncuationKind::SemiColon) {
-                break;
-            } else if cur == Token::EOF {
-                return Err(ParserError::UnexpectedToken { token: cur }.into());
-            } else {
-                expression.push(cur);
-            }
-        }
-
-        let statement = LetStatement::new(identifier, Expresion::new(expression));
+        expression = Expression::parse(parser).unwrap();
+        let statement = LetStatement::new(identifier, expression);
         Ok(statement)
     }
 }
