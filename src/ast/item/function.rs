@@ -1,6 +1,6 @@
 use core::fmt;
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 
 use crate::{
     ast::block::Block,
@@ -23,16 +23,16 @@ impl FuncItem {
 
     pub fn parse(parser: &mut Parser) -> Result<FuncItem> {
         let name: String;
-        let next = parser.tokens.peek().unwrap();
+        let next = parser.peek()?;
         match next {
-            Token::Keyword(KeywordKind::Func) => parser.tokens.next().unwrap(),
+            Token::Keyword(KeywordKind::Func) => parser.consume()?,
             _ => return Err(ParserError::UnexpectedEndOfInput.into()),
         };
-        let next = parser.tokens.peek().unwrap();
+        let next = parser.peek()?;
         match next {
             Token::Ident(id) => {
                 name = id.clone();
-                parser.tokens.next().unwrap();
+                parser.consume()?;
             }
             _ => {
                 return Err(ParserError::UnexpectedToken {
@@ -41,9 +41,9 @@ impl FuncItem {
                 .into());
             }
         }
-        let next = parser.tokens.peek().unwrap();
+        let next = parser.peek()?;
         match next {
-            Token::Punctuation(PuncuationKind::LeftParen) => parser.tokens.next().unwrap(),
+            Token::Punctuation(PuncuationKind::LeftParen) => parser.consume()?,
             _ => {
                 return Err(ParserError::UnexpectedToken {
                     token: next.clone(),
@@ -51,9 +51,9 @@ impl FuncItem {
                 .into());
             }
         };
-        let next = parser.tokens.peek().unwrap();
+        let next = parser.peek()?;
         match next {
-            Token::Punctuation(PuncuationKind::RightParen) => parser.tokens.next().unwrap(),
+            Token::Punctuation(PuncuationKind::RightParen) => parser.consume()?,
             _ => {
                 return Err(ParserError::UnexpectedToken {
                     token: next.clone(),
@@ -61,9 +61,9 @@ impl FuncItem {
                 .into());
             }
         };
-        let next = parser.tokens.peek().unwrap();
+        let next = parser.peek()?;
         match next {
-            Token::Punctuation(PuncuationKind::LeftCurlyParen) => parser.tokens.next().unwrap(),
+            Token::Punctuation(PuncuationKind::LeftCurlyParen) => parser.consume()?,
             _ => {
                 return Err(ParserError::UnexpectedToken {
                     token: next.clone(),
@@ -74,11 +74,11 @@ impl FuncItem {
 
         let params: Option<Vec<Token>> = None;
 
-        let body = Block::parse(parser).expect("Error while parsing function body");
+        let body = Block::parse(parser).context("Error while parsing function body")?;
 
-        let next = parser.tokens.peek().unwrap();
+        let next = parser.peek()?;
         match next {
-            Token::Punctuation(PuncuationKind::RightCurlyParen) => parser.tokens.next().unwrap(),
+            Token::Punctuation(PuncuationKind::RightCurlyParen) => parser.consume()?,
             _ => {
                 return Err(ParserError::UnexpectedToken {
                     token: next.clone(),

@@ -1,5 +1,5 @@
 use crate::errors::ParserError;
-use crate::lexer::token::{KeywordKind, OperatorKind, PuncuationKind};
+use crate::lexer::token::{KeywordKind, OperatorKind};
 use crate::{ast::expression::Expression, lexer::token::Token, parser::Parser};
 use anyhow::Result;
 use std::fmt::{self, Display};
@@ -18,37 +18,37 @@ impl LetStatement {
     pub fn parse(parser: &mut Parser) -> Result<LetStatement> {
         let identifier: Token;
         let expression: Expression;
-        if parser.tokens.peek().unwrap() == &Token::Keyword(KeywordKind::Let) {
-            parser.tokens.next().unwrap();
+        if parser.peek()? == &Token::Keyword(KeywordKind::Let) {
+            parser.consume()?;
         } else {
             return Err(ParserError::ExpectedTokenGotUnexpected {
-                got: parser.tokens.peek().unwrap().clone(),
+                got: parser.peek()?.clone(),
                 kind: Token::Keyword(KeywordKind::Let),
             }
             .into());
         }
 
-        if let Token::Ident(_id) = parser.tokens.peek().unwrap() {
-            identifier = parser.tokens.next().unwrap();
+        if let Token::Ident(_id) = parser.peek()? {
+            identifier = parser.consume()?;
         } else {
             return Err(ParserError::ExpectedTokenGotUnexpected {
                 kind: Token::Ident("identifier".to_string()),
-                got: parser.tokens.peek().unwrap().clone(),
+                got: parser.peek()?.clone(),
             }
             .into());
         }
 
-        if parser.tokens.peek().unwrap() == &Token::Operator(OperatorKind::Equal) {
-            parser.tokens.next().unwrap();
+        if parser.peek()? == &Token::Operator(OperatorKind::Equal) {
+            parser.consume()?;
         } else {
             return Err(ParserError::ExpectedTokenGotUnexpected {
                 kind: Token::Operator(OperatorKind::Equal),
-                got: parser.tokens.peek().unwrap().clone(),
+                got: parser.peek()?.clone(),
             }
             .into());
         }
 
-        expression = Expression::parse(parser).unwrap();
+        expression = Expression::parse(parser)?;
         let statement = LetStatement::new(identifier, expression);
         Ok(statement)
     }

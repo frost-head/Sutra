@@ -18,9 +18,9 @@ impl ReturnStatement {
 
     pub fn parse(parser: &mut Parser) -> Result<ReturnStatement> {
         let expression: Expression;
-        let peek: &Token = parser.tokens.peek().unwrap();
+        let peek: &Token = parser.peek()?;
         if *peek == Token::Keyword(KeywordKind::Return) {
-            parser.tokens.next();
+            parser.consume()?;
         } else {
             return Err(ParserError::ExpectedTokenGotUnexpected {
                 kind: Token::Keyword(KeywordKind::Return),
@@ -29,7 +29,7 @@ impl ReturnStatement {
             .into());
         }
 
-        expression = Expression::parse(parser).unwrap();
+        expression = Expression::parse(parser)?;
         let statement = ReturnStatement::new(expression);
         return Ok(statement);
     }

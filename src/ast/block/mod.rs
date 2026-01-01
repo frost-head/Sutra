@@ -19,7 +19,8 @@ impl Block {
 
     pub fn parse(parser: &mut Parser) -> Result<Block> {
         let mut statements = Vec::new();
-        while let Some(next) = parser.tokens.peek() {
+        loop {
+            let next = parser.peek()?;
             match next {
                 Token::Keyword(KeywordKind::Let) => {
                     let st = Stmt::LetStmt(LetStatement::parse(parser)?);
@@ -31,6 +32,9 @@ impl Block {
                 }
                 Token::Punctuation(PuncuationKind::RightCurlyParen) => {
                     return Ok(Block::new(statements));
+                },
+                Token::EOF => {
+                    break;
                 }
                 _ => {
                     return Err(ParserError::UnexpectedToken {
