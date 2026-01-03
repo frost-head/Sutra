@@ -11,9 +11,7 @@ function main()
           Value: 2 
     } 
     if : (x < y) then {
-        Let Statement:
-          Identifier: Ident('x')
-          Value: 2 
+        ident x binds 2 
     } else : {
         Let Statement:
           Identifier: Ident('x')

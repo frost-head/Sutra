@@ -8,7 +8,7 @@ use crate::ast::{
 pub enum Stmt {
     LetStmt(LetStatement),
     ReturnStmt(ReturnStatement),
-    If(Expression),
+    Expr(Expression),
 }
 
 impl fmt::Display for Stmt {
@@ -16,7 +16,7 @@ impl fmt::Display for Stmt {
         match self {
             Stmt::LetStmt(stmt) => write!(f, "{} \n", stmt),
             Stmt::ReturnStmt(stmt) => write!(f, "{} \n", stmt),
-            Stmt::If(expression) => write!(f, "{} \n", expression),
+            Stmt::Expr(expression) => write!(f, "{} \n", expression),
         }
     }
 }

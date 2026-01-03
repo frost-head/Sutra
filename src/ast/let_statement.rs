@@ -29,27 +29,11 @@ impl LetStatement {
             .into());
         }
 
-        if *parser.peek()? == Token::Operator(OperatorKind::Equal) {
-            parser.consume()?;
-        } else {
-            return Err(ParserError::ExpectedTokenGotUnexpected {
-                kind: Token::Operator(OperatorKind::Equal),
-                got: parser.peek()?.clone(),
-            }
-            .into());
-        }
-
+        parser.expect(Token::Operator(OperatorKind::Equal))?;
         expression = Expression::parse(parser)?;
 
-        if *parser.peek()? == Token::Punctuation(PuncuationKind::SemiColon) {
-            parser.consume()?;
-        } else {
-            return Err(ParserError::ExpectedTokenGotUnexpected {
-                kind: Token::Punctuation(PuncuationKind::SemiColon),
-                got: parser.peek()?.clone(),
-            }
-            .into());
-        }
+        parser.expect(Token::Punctuation(PuncuationKind::SemiColon))?;
+
         let statement = LetStatement::new(identifier, expression);
         Ok(statement)
     }

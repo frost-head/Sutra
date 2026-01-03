@@ -1,5 +1,9 @@
-use crate::{ast::block::Block, lexer::token::OperatorKind};
+use crate::{
+    ast::{block::Block, expression::assign::Identifier},
+    lexer::token::OperatorKind,
+};
 use core::fmt;
+pub mod assign;
 pub mod if_expr;
 mod parse;
 
@@ -29,6 +33,10 @@ pub enum Expression {
         else_block: Option<Box<Expression>>,
     },
     Block(Block),
+    Assign {
+        target: Identifier,
+        value: Box<Expression>,
+    },
 }
 
 impl fmt::Display for Expression {
@@ -60,6 +68,7 @@ impl fmt::Display for Expression {
                 )
             }
             Expression::Block(block) => write!(f, "{}", block),
+            Expression::Assign { target, value } => write!(f, "ident {} binds {}", target, value),
         }
     }
 }

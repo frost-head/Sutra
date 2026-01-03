@@ -3,11 +3,13 @@ use core::fmt;
 
 use crate::{
     ast::{
-        expression::if_expr::parse_if, let_statement::LetStatement,
-        return_statement::ReturnStatement, statement::Stmt,
+        expression::{Expression, assign::Identifier, if_expr::parse_if},
+        let_statement::LetStatement,
+        return_statement::ReturnStatement,
+        statement::Stmt,
     },
     errors::ParserError,
-    lexer::token::{KeywordKind, PuncuationKind, Token},
+    lexer::token::{KeywordKind, OperatorKind, PuncuationKind, Token},
     parser::Parser,
     utils::indent_multiline,
 };
@@ -40,7 +42,16 @@ impl Block {
                 }
                 Token::Punctuation(PuncuationKind::LeftCurlyParen) => {}
                 Token::Keyword(KeywordKind::If) => {
-                    let st = Stmt::If(parse_if(parser)?);
+                    let st = Stmt::Expr(parse_if(parser)?);
+                    statements.push(st);
+                }
+                Token::Ident(identifier) => {
+                    parser.expect(Token::Operator(OperatorKind::Equal))?;
+                    let st = Stmt::Expr(Expression::Assign {
+                        target: Identifier { name: identifier },
+                        value: Box::new(Expression::parse_expression(parser, 0)?),
+                    });
+                    parser.expect(Token::Punctuation(PuncuationKind::SemiColon))?;
                     statements.push(st);
                 }
                 Token::EOF => {

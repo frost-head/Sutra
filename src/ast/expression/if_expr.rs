@@ -1,15 +1,12 @@
 use crate::{
-    ast::{
-        block::Block,
-        expression::{Expression, parse::parse_expression},
-    },
+    ast::{block::Block, expression::Expression},
     lexer::token::{KeywordKind, Token},
     parser::Parser,
 };
 use anyhow::{Ok, Result};
 
 pub fn parse_if(parser: &mut Parser) -> Result<Expression> {
-    let expr = parse_expression(parser, 0)?;
+    let expr = Expression::parse_expression(parser, 0)?;
 
     let then_block = Block::parse(parser)?;
 

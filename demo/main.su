@@ -4,7 +4,8 @@ func main() {
     let y = if x < y {let y = 2;};
 
     if (x < y) {
-        let x = 2; }
+        x = 2;
+    }
     else{
         let x = 3;
     }
