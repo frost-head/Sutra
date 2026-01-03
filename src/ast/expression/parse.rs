@@ -1,7 +1,7 @@
 use crate::{
     ast::expression::Expression,
     errors::ParserError,
-    lexer::token::{OperatorKind, Token},
+    lexer::token::{OperatorKind, PuncuationKind, Token},
     parser::Parser,
 };
 use anyhow::{Context, Ok, Result};
@@ -31,6 +31,12 @@ fn parse_prefix(parser: &mut Parser) -> Result<Expression> {
                 operand: Box::new(expr),
             })
         }
+        Token::Punctuation(PuncuationKind::LeftParen) => {
+            let expr = parse_expression(parser, 0)?;
+            parser.expect(Token::Punctuation(PuncuationKind::RightParen))?;
+            Ok(expr)
+        }
+
         _ => {
             return Err(ParserError::UnexpectedToken { token: new.clone() }.into());
         }

@@ -1,6 +1,6 @@
 use crate::ast::expression::Expression;
 use crate::errors::ParserError;
-use crate::lexer::token::{KeywordKind, Token};
+use crate::lexer::token::{KeywordKind, PuncuationKind, Token};
 use crate::parser::Parser;
 use anyhow::Result;
 use core::fmt;
@@ -30,6 +30,15 @@ impl ReturnStatement {
         }
 
         expression = Expression::parse(parser)?;
+        if *parser.peek()? == Token::Punctuation(PuncuationKind::SemiColon) {
+                    parser.consume()?;
+                } else {
+                    return Err(ParserError::ExpectedTokenGotUnexpected {
+                        kind: Token::Punctuation(PuncuationKind::SemiColon),
+                        got: parser.peek()?.clone(),
+                    }
+                    .into());
+                }
         let statement = ReturnStatement::new(expression);
         return Ok(statement);
     }

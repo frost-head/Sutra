@@ -56,4 +56,17 @@ impl<'a> Parser<'a> {
             .next()
             .context("Could not consume the next token");
     }
+
+    pub fn expect(&mut self, expected: Token) -> Result<()> {
+        let tok = self.consume()?;
+        if tok == expected {
+            Ok(())
+        } else {
+            Err(ParserError::ExpectedTokenGotUnexpected {
+                kind: expected,
+                got: tok,
+            }
+            .into())
+        }
+    }
 }

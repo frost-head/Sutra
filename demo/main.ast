@@ -7,11 +7,13 @@ function main() {
       Value: ((10 / x) < 5)
     Let Statement:
       Identifier: Ident('z')
-      Value: (10 + (2 / 5))
+      Value: ((10 + 2) / 5)
     Let Statement:
       Identifier: Ident('a')
       Value: (- 1)
     Let Statement:
       Identifier: Ident('b')
       Value: (! true)
+    Return Statement:
+        Value: (x + (z / (b * (y / a))))
 }

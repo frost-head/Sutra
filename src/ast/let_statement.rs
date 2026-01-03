@@ -1,5 +1,5 @@
 use crate::errors::ParserError;
-use crate::lexer::token::{KeywordKind, OperatorKind};
+use crate::lexer::token::{KeywordKind, OperatorKind, PuncuationKind};
 use crate::{ast::expression::Expression, lexer::token::Token, parser::Parser};
 use anyhow::Result;
 use std::fmt::{self, Display};
@@ -38,7 +38,7 @@ impl LetStatement {
             .into());
         }
 
-        if parser.peek()? == &Token::Operator(OperatorKind::Equal) {
+        if *parser.peek()? == Token::Operator(OperatorKind::Equal) {
             parser.consume()?;
         } else {
             return Err(ParserError::ExpectedTokenGotUnexpected {
@@ -49,7 +49,16 @@ impl LetStatement {
         }
 
         expression = Expression::parse(parser)?;
-        parser.consume()?;
+
+        if *parser.peek()? == Token::Punctuation(PuncuationKind::SemiColon) {
+            parser.consume()?;
+        } else {
+            return Err(ParserError::ExpectedTokenGotUnexpected {
+                kind: Token::Punctuation(PuncuationKind::SemiColon),
+                got: parser.peek()?.clone(),
+            }
+            .into());
+        }
         let statement = LetStatement::new(identifier, expression);
         Ok(statement)
     }
