@@ -1,0 +1,8 @@
+function main() {
+    Let Statement:
+      Identifier: Ident('x')
+      Value: 5
+    Let Statement:
+      Identifier: Ident('y')
+      Value: 10
+}

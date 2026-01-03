@@ -1,9 +1,4 @@
-func add() {
-    return a + b;
-}
-
 func main() {
     let x = 5;
     let y = 10;
-    return x + y;
 }
