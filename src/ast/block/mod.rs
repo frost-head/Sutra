@@ -2,12 +2,17 @@ use anyhow::Result;
 use core::fmt;
 
 use crate::{
-    ast::{let_statement::LetStatement, return_statement::ReturnStatement},
+    ast::{
+        expression::if_expr::parse_if, let_statement::LetStatement,
+        return_statement::ReturnStatement, statement::Stmt,
+    },
     errors::ParserError,
     lexer::token::{KeywordKind, PuncuationKind, Token},
     parser::Parser,
+    utils::indent_multiline,
 };
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct Block {
     pub statements: Vec<Stmt>,
 }
@@ -20,7 +25,7 @@ impl Block {
     pub fn parse(parser: &mut Parser) -> Result<Block> {
         let mut statements = Vec::new();
         loop {
-            let next = parser.peek()?;
+            let next = parser.consume()?;
             match next {
                 Token::Keyword(KeywordKind::Let) => {
                     let st = Stmt::LetStmt(LetStatement::parse(parser)?);
@@ -32,7 +37,12 @@ impl Block {
                 }
                 Token::Punctuation(PuncuationKind::RightCurlyParen) => {
                     return Ok(Block::new(statements));
-                },
+                }
+                Token::Punctuation(PuncuationKind::LeftCurlyParen) => {}
+                Token::Keyword(KeywordKind::If) => {
+                    let st = Stmt::If(parse_if(parser)?);
+                    statements.push(st);
+                }
                 Token::EOF => {
                     break;
                 }
@@ -51,23 +61,11 @@ impl Block {
 
 impl fmt::Display for Block {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{{\n")?;
         for stmt in &self.statements {
-            writeln!(f, "{}", stmt)?;
+            write!(f, "{}\n", indent_multiline(&stmt.to_string(), "    "))?;
         }
+        write!(f, "}}")?;
         Ok(())
-    }
-}
-
-pub enum Stmt {
-    LetStmt(LetStatement),
-    ReturnStmt(ReturnStatement),
-}
-
-impl fmt::Display for Stmt {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Stmt::LetStmt(stmt) => write!(f, "{}", stmt),
-            Stmt::ReturnStmt(stmt) => write!(f, "{}", stmt),
-        }
     }
 }

@@ -1,7 +1,7 @@
 use crate::{
-    ast::expression::Expression,
+    ast::expression::{Expression, if_expr::parse_if},
     errors::ParserError,
-    lexer::token::{OperatorKind, PuncuationKind, Token},
+    lexer::token::{KeywordKind, OperatorKind, PuncuationKind, Token},
     parser::Parser,
 };
 use anyhow::{Context, Ok, Result};
@@ -17,6 +17,7 @@ fn parse_prefix(parser: &mut Parser) -> Result<Expression> {
     match new {
         Token::Number(num) => Ok(Expression::Literal { literal: num }),
         Token::Ident(ident) => Ok(Expression::Ident { identifier: ident }),
+        Token::Keyword(KeywordKind::If) => Ok(parse_if(parser)?),
         Token::Operator(OperatorKind::Bang) => {
             let expr = parse_expression(parser, 8).context("Could not parse expression")?;
             Ok(Expression::Unary {
@@ -43,7 +44,7 @@ fn parse_prefix(parser: &mut Parser) -> Result<Expression> {
     }
 }
 
-fn parse_expression(parser: &mut Parser, min_bp: u8) -> Result<Expression> {
+pub fn parse_expression(parser: &mut Parser, min_bp: u8) -> Result<Expression> {
     let mut lhs = parse_prefix(parser).context("Could not parse lhs")?;
 
     loop {

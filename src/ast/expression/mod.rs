@@ -1,5 +1,6 @@
-use crate::lexer::token::OperatorKind;
+use crate::{ast::block::Block, lexer::token::OperatorKind};
 use core::fmt;
+pub mod if_expr;
 mod parse;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -22,7 +23,14 @@ pub enum Expression {
     Ident {
         identifier: String,
     },
+    If {
+        if_expr: Box<Expression>,
+        then_block: Box<Expression>,
+        else_block: Option<Box<Expression>>,
+    },
+    Block(Block),
 }
+
 impl fmt::Display for Expression {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -35,6 +43,23 @@ impl fmt::Display for Expression {
             Expression::Grouped { expression } => write!(f, "({})", expression),
             Expression::Unary { operator, operand } => write!(f, "({} {})", operator, operand),
             Expression::Ident { identifier } => write!(f, "{}", identifier),
+            Expression::If {
+                if_expr,
+                then_block,
+                else_block,
+            } => {
+                write!(
+                    f,
+                    "if : {} then {}{}",
+                    if_expr,
+                    then_block,
+                    match else_block {
+                        Some(else_blk) => format!(" else : {}", else_blk),
+                        None => String::new(),
+                    }
+                )
+            }
+            Expression::Block(block) => write!(f, "{}", block),
         }
     }
 }

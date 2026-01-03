@@ -1,9 +1,13 @@
 func main() {
     let x = (5 * 8) + 3;
-    let y = 10 / x < 5;
-    let z = (10+2)/5;
-    let a = -1;
-    let b = !true;
 
-    return x + z / (b * (y/a));
+    let y = if x < y {let y = 2;};
+
+    if (x < y) {
+        let x = 2; }
+    else{
+        let x = 3;
+    }
+
+    return c;
 }

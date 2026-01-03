@@ -4,7 +4,7 @@ pub mod expression;
 pub mod item;
 pub mod let_statement;
 pub mod return_statement;
-
+pub mod statement;
 
 pub struct Ast {
     pub items: Vec<Item>,

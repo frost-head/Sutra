@@ -1,12 +1,12 @@
 use crate::ast::expression::Expression;
 use crate::errors::ParserError;
-use crate::lexer::token::{KeywordKind, PuncuationKind, Token};
+use crate::lexer::token::{PuncuationKind, Token};
 use crate::parser::Parser;
 use anyhow::Result;
 use core::fmt;
 use std::fmt::Display;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ReturnStatement {
     pub value: Expression,
 }
@@ -18,27 +18,17 @@ impl ReturnStatement {
 
     pub fn parse(parser: &mut Parser) -> Result<ReturnStatement> {
         let expression: Expression;
-        let peek: &Token = parser.peek()?;
-        if *peek == Token::Keyword(KeywordKind::Return) {
-            parser.consume()?;
-        } else {
-            return Err(ParserError::ExpectedTokenGotUnexpected {
-                kind: Token::Keyword(KeywordKind::Return),
-                got: peek.clone(),
-            }
-            .into());
-        }
 
         expression = Expression::parse(parser)?;
         if *parser.peek()? == Token::Punctuation(PuncuationKind::SemiColon) {
-                    parser.consume()?;
-                } else {
-                    return Err(ParserError::ExpectedTokenGotUnexpected {
-                        kind: Token::Punctuation(PuncuationKind::SemiColon),
-                        got: parser.peek()?.clone(),
-                    }
-                    .into());
-                }
+            parser.consume()?;
+        } else {
+            return Err(ParserError::ExpectedTokenGotUnexpected {
+                kind: Token::Punctuation(PuncuationKind::SemiColon),
+                got: parser.peek()?.clone(),
+            }
+            .into());
+        }
         let statement = ReturnStatement::new(expression);
         return Ok(statement);
     }

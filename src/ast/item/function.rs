@@ -7,7 +7,6 @@ use crate::{
     errors::ParserError,
     lexer::token::{KeywordKind, PuncuationKind, Token},
     parser::Parser,
-    utils::indent_multiline,
 };
 
 pub struct FuncItem {
@@ -63,7 +62,7 @@ impl FuncItem {
         };
         let next = parser.peek()?;
         match next {
-            Token::Punctuation(PuncuationKind::LeftCurlyParen) => parser.consume()?,
+            Token::Punctuation(PuncuationKind::LeftCurlyParen) => {}
             _ => {
                 return Err(ParserError::UnexpectedToken {
                     token: next.clone(),
@@ -75,17 +74,6 @@ impl FuncItem {
         let params: Option<Vec<Token>> = None;
 
         let body = Block::parse(parser).context("Error while parsing function body")?;
-
-        let next = parser.peek()?;
-        match next {
-            Token::Punctuation(PuncuationKind::RightCurlyParen) => parser.consume()?,
-            _ => {
-                return Err(ParserError::UnexpectedToken {
-                    token: next.clone(),
-                }
-                .into());
-            }
-        };
 
         Ok(FuncItem { name, params, body })
     }
@@ -99,11 +87,7 @@ impl fmt::Display for FuncItem {
                 write!(f, "{}", param)?;
             }
         }
-        write!(
-            f,
-            ") {{\n{}\n}}",
-            indent_multiline(&self.body.to_string(), "    ")
-        )?;
+        write!(f, ") \n{}\n", self.body)?;
         Ok(())
     }
 }

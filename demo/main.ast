@@ -1,19 +1,24 @@
-function main() {
+function main() 
+{
     Let Statement:
       Identifier: Ident('x')
-      Value: ((5 * 8) + 3)
+      Value: ((5 * 8) + 3) 
     Let Statement:
       Identifier: Ident('y')
-      Value: ((10 / x) < 5)
-    Let Statement:
-      Identifier: Ident('z')
-      Value: ((10 + 2) / 5)
-    Let Statement:
-      Identifier: Ident('a')
-      Value: (- 1)
-    Let Statement:
-      Identifier: Ident('b')
-      Value: (! true)
+      Value: if : (x < y) then {
+        Let Statement:
+          Identifier: Ident('y')
+          Value: 2 
+    } 
+    if : (x < y) then {
+        Let Statement:
+          Identifier: Ident('x')
+          Value: 2 
+    } else : {
+        Let Statement:
+          Identifier: Ident('x')
+          Value: 3 
+    } 
     Return Statement:
-        Value: (x + (z / (b * (y / a))))
+        Value: c 
 }

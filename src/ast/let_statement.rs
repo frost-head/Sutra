@@ -1,10 +1,10 @@
 use crate::errors::ParserError;
-use crate::lexer::token::{KeywordKind, OperatorKind, PuncuationKind};
+use crate::lexer::token::{OperatorKind, PuncuationKind};
 use crate::{ast::expression::Expression, lexer::token::Token, parser::Parser};
 use anyhow::Result;
 use std::fmt::{self, Display};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LetStatement {
     pub(crate) identifier: Token,
     pub(crate) value: Expression,
@@ -18,15 +18,6 @@ impl LetStatement {
     pub fn parse(parser: &mut Parser) -> Result<LetStatement> {
         let identifier: Token;
         let expression: Expression;
-        if parser.peek()? == &Token::Keyword(KeywordKind::Let) {
-            parser.consume()?;
-        } else {
-            return Err(ParserError::ExpectedTokenGotUnexpected {
-                got: parser.peek()?.clone(),
-                kind: Token::Keyword(KeywordKind::Let),
-            }
-            .into());
-        }
 
         if let Token::Ident(_id) = parser.peek()? {
             identifier = parser.consume()?;
