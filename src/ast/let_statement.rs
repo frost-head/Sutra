@@ -49,6 +49,7 @@ impl LetStatement {
         }
 
         expression = Expression::parse(parser)?;
+        parser.consume()?;
         let statement = LetStatement::new(identifier, expression);
         Ok(statement)
     }

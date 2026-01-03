@@ -103,17 +103,29 @@ impl Iterator for Lexer<'_> {
             '}' => Ok(Token::Punctuation(PuncuationKind::RightCurlyParen)),
             '[' => Ok(Token::Punctuation(PuncuationKind::LeftSquareParen)),
             ']' => Ok(Token::Punctuation(PuncuationKind::RightSquareParen)),
-            '<' => Ok(Token::Punctuation(PuncuationKind::LeftAngleParen)),
-            '>' => Ok(Token::Punctuation(PuncuationKind::RightAngleParen)),
             ':' => Ok(Token::Punctuation(PuncuationKind::Colon)),
             ';' => Ok(Token::Punctuation(PuncuationKind::SemiColon)),
             ',' => Ok(Token::Punctuation(PuncuationKind::Comma)),
-            '=' => Ok(Token::Operator(OperatorKind::Equal)),
+            '=' => {
+                self.chars.next();
+                do_next = false;
+                let n = match self.chars.peek() {
+                    Some(n) => n,
+                    None => return Some(Token::EOF),
+                };
+                match *n {
+                    '=' => Ok(Token::Operator(OperatorKind::EqualEqual)),
+                    _ => Ok(Token::Operator(OperatorKind::Equal)),
+                }
+            }
             '+' => Ok(Token::Operator(OperatorKind::Plus)),
             '-' => Ok(Token::Operator(OperatorKind::Minus)),
             '*' => Ok(Token::Operator(OperatorKind::Star)),
             '/' => Ok(Token::Operator(OperatorKind::Slash)),
             '%' => Ok(Token::Operator(OperatorKind::Percent)),
+            '<' => Ok(Token::Operator(OperatorKind::Less)),
+            '>' => Ok(Token::Operator(OperatorKind::Greater)),
+            '!' => Ok(Token::Operator(OperatorKind::Bang)),
             _ => {
                 if c.is_alphabetic() {
                     do_next = false; // read_identifier performs self.chars.next() to stop doing it twice we need this flag

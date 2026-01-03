@@ -1,4 +1,4 @@
-use crate::lexer::token::Token;
+use crate::lexer::token::OperatorKind;
 use core::fmt;
 mod parse;
 
@@ -8,7 +8,7 @@ pub enum Expression {
         literal: i64,
     },
     Binary {
-        operator: Token,
+        operator: OperatorKind,
         left: Box<Expression>,
         right: Box<Expression>,
     },
@@ -16,8 +16,11 @@ pub enum Expression {
         expression: Box<Expression>,
     },
     Unary {
-        operator: Token,
+        operator: OperatorKind,
         operand: Box<Expression>,
+    },
+    Ident {
+        identifier: String,
     },
 }
 impl fmt::Display for Expression {
@@ -31,6 +34,7 @@ impl fmt::Display for Expression {
             } => write!(f, "({} {} {})", left, operator, right),
             Expression::Grouped { expression } => write!(f, "({})", expression),
             Expression::Unary { operator, operand } => write!(f, "({} {})", operator, operand),
+            Expression::Ident { identifier } => write!(f, "{}", identifier),
         }
     }
 }
