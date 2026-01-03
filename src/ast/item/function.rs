@@ -1,13 +1,12 @@
 use core::fmt;
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 
 use crate::{
     ast::block::Block,
     errors::ParserError,
     lexer::token::{KeywordKind, PuncuationKind, Token},
     parser::Parser,
-    utils::indent_multiline,
 };
 
 pub struct FuncItem {
@@ -23,16 +22,16 @@ impl FuncItem {
 
     pub fn parse(parser: &mut Parser) -> Result<FuncItem> {
         let name: String;
-        let next = parser.tokens.peek().unwrap();
+        let next = parser.peek()?;
         match next {
-            Token::Keyword(KeywordKind::Func) => parser.tokens.next().unwrap(),
+            Token::Keyword(KeywordKind::Func) => parser.consume()?,
             _ => return Err(ParserError::UnexpectedEndOfInput.into()),
         };
-        let next = parser.tokens.peek().unwrap();
+        let next = parser.peek()?;
         match next {
             Token::Ident(id) => {
                 name = id.clone();
-                parser.tokens.next().unwrap();
+                parser.consume()?;
             }
             _ => {
                 return Err(ParserError::UnexpectedToken {
@@ -41,9 +40,9 @@ impl FuncItem {
                 .into());
             }
         }
-        let next = parser.tokens.peek().unwrap();
+        let next = parser.peek()?;
         match next {
-            Token::Punctuation(PuncuationKind::LeftParen) => parser.tokens.next().unwrap(),
+            Token::Punctuation(PuncuationKind::LeftParen) => parser.consume()?,
             _ => {
                 return Err(ParserError::UnexpectedToken {
                     token: next.clone(),
@@ -51,9 +50,9 @@ impl FuncItem {
                 .into());
             }
         };
-        let next = parser.tokens.peek().unwrap();
+        let next = parser.peek()?;
         match next {
-            Token::Punctuation(PuncuationKind::RightParen) => parser.tokens.next().unwrap(),
+            Token::Punctuation(PuncuationKind::RightParen) => parser.consume()?,
             _ => {
                 return Err(ParserError::UnexpectedToken {
                     token: next.clone(),
@@ -61,9 +60,9 @@ impl FuncItem {
                 .into());
             }
         };
-        let next = parser.tokens.peek().unwrap();
+        let next = parser.peek()?;
         match next {
-            Token::Punctuation(PuncuationKind::LeftCurlyParen) => parser.tokens.next().unwrap(),
+            Token::Punctuation(PuncuationKind::LeftCurlyParen) => {}
             _ => {
                 return Err(ParserError::UnexpectedToken {
                     token: next.clone(),
@@ -74,18 +73,7 @@ impl FuncItem {
 
         let params: Option<Vec<Token>> = None;
 
-        let body = Block::parse(parser).expect("Error while parsing function body");
-
-        let next = parser.tokens.peek().unwrap();
-        match next {
-            Token::Punctuation(PuncuationKind::RightCurlyParen) => parser.tokens.next().unwrap(),
-            _ => {
-                return Err(ParserError::UnexpectedToken {
-                    token: next.clone(),
-                }
-                .into());
-            }
-        };
+        let body = Block::parse(parser).context("Error while parsing function body")?;
 
         Ok(FuncItem { name, params, body })
     }
@@ -99,11 +87,7 @@ impl fmt::Display for FuncItem {
                 write!(f, "{}", param)?;
             }
         }
-        write!(
-            f,
-            ") {{\n{}\n}}",
-            indent_multiline(&self.body.to_string(), "    ")
-        )?;
+        write!(f, ") \n{}\n", self.body)?;
         Ok(())
     }
 }

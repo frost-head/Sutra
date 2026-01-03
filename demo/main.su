@@ -1,10 +1,14 @@
 func main() {
-    let x = 5;
-    let y = 10;
-    return x + y;
-}
+    let x = (5 * 8) + 3;
 
+    let y = if x < y {let y = 2;};
 
-func add() {
-    return a + b;
+    if (x < y) {
+        x = 2;
+    }
+    else{
+        let x = 3;
+    }
+
+    return c;
 }

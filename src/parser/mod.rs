@@ -42,4 +42,31 @@ impl<'a> Parser<'a> {
         }
         Ok(())
     }
+
+    pub fn peek(&mut self) -> Result<&Token> {
+        return Ok(self
+            .tokens
+            .peek()
+            .context("could not peek at the next token")?);
+    }
+
+    pub fn consume(&mut self) -> Result<Token> {
+        return self
+            .tokens
+            .next()
+            .context("Could not consume the next token");
+    }
+
+    pub fn expect(&mut self, expected: Token) -> Result<()> {
+        let tok = self.consume()?;
+        if tok == expected {
+            Ok(())
+        } else {
+            Err(ParserError::ExpectedTokenGotUnexpected {
+                kind: expected,
+                got: tok,
+            }
+            .into())
+        }
+    }
 }

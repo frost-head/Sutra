@@ -1,13 +1,22 @@
-function main() {
+function main() 
+{
     Let Statement:
       Identifier: Ident('x')
-      Value: Num(5) 
+      Value: ((5 * 8) + 3) 
     Let Statement:
       Identifier: Ident('y')
-      Value: Num(10) 
+      Value: if : (x < y) then {
+        Let Statement:
+          Identifier: Ident('y')
+          Value: 2 
+    } 
+    if : (x < y) then {
+        ident x binds 2 
+    } else : {
+        Let Statement:
+          Identifier: Ident('x')
+          Value: 3 
+    } 
     Return Statement:
-        Value: Ident('x') Plus(+) Ident('y') 
-}function add() {
-    Return Statement:
-        Value: Ident('a') Plus(+) Ident('b') 
+        Value: c 
 }

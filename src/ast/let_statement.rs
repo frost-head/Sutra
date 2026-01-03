@@ -1,65 +1,40 @@
 use crate::errors::ParserError;
-use crate::lexer::token::{KeywordKind, OperatorKind, PuncuationKind};
-use crate::{ast::expression::Expresion, lexer::token::Token, parser::Parser};
+use crate::lexer::token::{OperatorKind, PuncuationKind};
+use crate::{ast::expression::Expression, lexer::token::Token, parser::Parser};
 use anyhow::Result;
 use std::fmt::{self, Display};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LetStatement {
     pub(crate) identifier: Token,
-    pub(crate) value: Expresion,
+    pub(crate) value: Expression,
 }
 
 impl LetStatement {
-    pub fn new(identifier: Token, value: Expresion) -> LetStatement {
+    pub fn new(identifier: Token, value: Expression) -> LetStatement {
         LetStatement { identifier, value }
     }
 
     pub fn parse(parser: &mut Parser) -> Result<LetStatement> {
         let identifier: Token;
-        let mut expression: Vec<Token> = Vec::new();
-        if parser.tokens.peek().unwrap() == &Token::Keyword(KeywordKind::Let) {
-            parser.tokens.next().unwrap();
-        } else {
-            return Err(ParserError::ExpectedTokenGotUnexpected {
-                got: parser.tokens.peek().unwrap().clone(),
-                kind: Token::Keyword(KeywordKind::Let),
-            }
-            .into());
-        }
+        let expression: Expression;
 
-        if let Token::Ident(_id) = parser.tokens.peek().unwrap() {
-            identifier = parser.tokens.next().unwrap();
+        if let Token::Ident(_id) = parser.peek()? {
+            identifier = parser.consume()?;
         } else {
             return Err(ParserError::ExpectedTokenGotUnexpected {
                 kind: Token::Ident("identifier".to_string()),
-                got: parser.tokens.peek().unwrap().clone(),
+                got: parser.peek()?.clone(),
             }
             .into());
         }
 
-        if parser.tokens.peek().unwrap() == &Token::Operator(OperatorKind::Equal) {
-            parser.tokens.next().unwrap();
-        } else {
-            return Err(ParserError::ExpectedTokenGotUnexpected {
-                kind: Token::Operator(OperatorKind::Equal),
-                got: parser.tokens.peek().unwrap().clone(),
-            }
-            .into());
-        }
+        parser.expect(Token::Operator(OperatorKind::Equal))?;
+        expression = Expression::parse(parser)?;
 
-        loop {
-            let cur = parser.tokens.next().unwrap();
-            if cur == Token::Punctuation(PuncuationKind::SemiColon) {
-                break;
-            } else if cur == Token::EOF {
-                return Err(ParserError::UnexpectedToken { token: cur }.into());
-            } else {
-                expression.push(cur);
-            }
-        }
+        parser.expect(Token::Punctuation(PuncuationKind::SemiColon))?;
 
-        let statement = LetStatement::new(identifier, Expresion::new(expression));
+        let statement = LetStatement::new(identifier, expression);
         Ok(statement)
     }
 }

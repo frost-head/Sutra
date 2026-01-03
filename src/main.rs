@@ -1,18 +1,16 @@
+use anyhow::Result;
 use clap::Parser as clap_parser;
 use std::fs;
 use sutra::parser::Parser;
 use sutra::{ast::item::Item, lexer::Lexer};
 
-fn main() {
+fn main() -> Result<()> {
     let content = read_file();
 
     let lexer = Lexer::new(&content);
 
     let mut parser = Parser::new(lexer);
-    if let Err(err) = parser.parse() {
-        eprintln!("Error occured while parsing the input: {}", err);
-        std::process::exit(1);
-    }
+    let _ = parser.parse()?;
 
     let mut output_buffer = String::new();
 
@@ -29,6 +27,7 @@ fn main() {
     }
 
     write_file(output_buffer);
+    Ok(())
 }
 
 #[derive(clap_parser)]

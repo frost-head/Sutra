@@ -19,8 +19,6 @@ pub enum PuncuationKind {
     RightCurlyParen,
     LeftSquareParen,
     RightSquareParen,
-    LeftAngleParen,
-    RightAngleParen,
     SemiColon,
     Colon,
     Comma,
@@ -33,6 +31,10 @@ pub enum OperatorKind {
     Star,
     Slash,
     Percent,
+    Less,
+    Greater,
+    EqualEqual,
+    Bang,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -64,12 +66,16 @@ impl fmt::Display for Token {
 impl fmt::Display for OperatorKind {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            OperatorKind::Equal => write!(f, "Equal(=)"),
-            OperatorKind::Plus => write!(f, "Plus(+)"),
-            OperatorKind::Minus => write!(f, "Minus(-)"),
-            OperatorKind::Star => write!(f, "Star(*)"),
-            OperatorKind::Slash => write!(f, "Slash(/)"),
-            OperatorKind::Percent => write!(f, "Percentage(%)"),
+            OperatorKind::Equal => write!(f, "="),
+            OperatorKind::Plus => write!(f, "+"),
+            OperatorKind::Minus => write!(f, "-"),
+            OperatorKind::Star => write!(f, "*"),
+            OperatorKind::Slash => write!(f, "/"),
+            OperatorKind::Percent => write!(f, "%"),
+            OperatorKind::Less => write!(f, "<"),
+            OperatorKind::Greater => write!(f, ">"),
+            OperatorKind::EqualEqual => write!(f, "=="),
+            OperatorKind::Bang => write!(f, "!"),
         }
     }
 }
@@ -98,8 +104,6 @@ impl fmt::Display for PuncuationKind {
             PuncuationKind::RightCurlyParen => write!(f, "Punctuation : }}"),
             PuncuationKind::LeftSquareParen => write!(f, "Punctuation : ["),
             PuncuationKind::RightSquareParen => write!(f, "Punctuation : ]"),
-            PuncuationKind::LeftAngleParen => write!(f, "Punctuation : <"),
-            PuncuationKind::RightAngleParen => write!(f, "Punctuation : >"),
             PuncuationKind::SemiColon => write!(f, "Punctuation : ;"),
             PuncuationKind::Colon => write!(f, "Punctuation : :"),
             PuncuationKind::Comma => write!(f, "Punctuation : ,"),

@@ -2,12 +2,19 @@ use anyhow::Result;
 use core::fmt;
 
 use crate::{
-    ast::{let_statement::LetStatement, return_statement::ReturnStatement},
+    ast::{
+        expression::{Expression, assign::Identifier, if_expr::parse_if},
+        let_statement::LetStatement,
+        return_statement::ReturnStatement,
+        statement::Stmt,
+    },
     errors::ParserError,
-    lexer::token::{KeywordKind, PuncuationKind, Token},
+    lexer::token::{KeywordKind, OperatorKind, PuncuationKind, Token},
     parser::Parser,
+    utils::indent_multiline,
 };
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct Block {
     pub statements: Vec<Stmt>,
 }
@@ -19,7 +26,8 @@ impl Block {
 
     pub fn parse(parser: &mut Parser) -> Result<Block> {
         let mut statements = Vec::new();
-        while let Some(next) = parser.tokens.peek() {
+        loop {
+            let next = parser.consume()?;
             match next {
                 Token::Keyword(KeywordKind::Let) => {
                     let st = Stmt::LetStmt(LetStatement::parse(parser)?);
@@ -31,6 +39,23 @@ impl Block {
                 }
                 Token::Punctuation(PuncuationKind::RightCurlyParen) => {
                     return Ok(Block::new(statements));
+                }
+                Token::Punctuation(PuncuationKind::LeftCurlyParen) => {}
+                Token::Keyword(KeywordKind::If) => {
+                    let st = Stmt::Expr(parse_if(parser)?);
+                    statements.push(st);
+                }
+                Token::Ident(identifier) => {
+                    parser.expect(Token::Operator(OperatorKind::Equal))?;
+                    let st = Stmt::Expr(Expression::Assign {
+                        target: Identifier { name: identifier },
+                        value: Box::new(Expression::parse_expression(parser, 0)?),
+                    });
+                    parser.expect(Token::Punctuation(PuncuationKind::SemiColon))?;
+                    statements.push(st);
+                }
+                Token::EOF => {
+                    break;
                 }
                 _ => {
                     return Err(ParserError::UnexpectedToken {
@@ -47,23 +72,11 @@ impl Block {
 
 impl fmt::Display for Block {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{{\n")?;
         for stmt in &self.statements {
-            writeln!(f, "{}", stmt)?;
+            write!(f, "{}\n", indent_multiline(&stmt.to_string(), "    "))?;
         }
+        write!(f, "}}")?;
         Ok(())
-    }
-}
-
-pub enum Stmt {
-    LetStmt(LetStatement),
-    ReturnStmt(ReturnStatement),
-}
-
-impl fmt::Display for Stmt {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Stmt::LetStmt(stmt) => write!(f, "{}", stmt),
-            Stmt::ReturnStmt(stmt) => write!(f, "{}", stmt),
-        }
     }
 }
