@@ -1,6 +1,10 @@
 use crate::{
-    ast::{block::Block, expression::Expression},
-    lexer::token::{KeywordKind, Token},
+    ast::{
+        block::Block,
+        expression::{Expression, ExpressionKind},
+    },
+    errors::span::Span,
+    lexer::token::{KeywordKind, TokenKind},
     parser::Parser,
 };
 use anyhow::{Ok, Result};
@@ -12,21 +16,39 @@ pub fn parse_if(parser: &mut Parser) -> Result<Expression> {
 
     let mut else_block = None;
 
-    if parser.peek()? == &Token::Keyword(KeywordKind::Else) {
+    let mut span = Span::merge(expr.span, then_block.span);
+    if parser.peek()?.kind == TokenKind::Keyword(KeywordKind::Else) {
         parser.consume()?;
-        else_block = Some(Block::parse(parser)?);
+        let block = Block::parse(parser)?;
+        else_block = Some(block.clone());
+        span = Span::merge(span, block.span);
     }
 
     match else_block {
-        Some(else_block) => Ok(Expression::If {
-            if_expr: Box::new(expr),
-            then_block: Box::new(Expression::Block(then_block)),
-            else_block: Some(Box::new(Expression::Block(else_block))),
+        Some(else_block) => Ok(Expression {
+            kind: ExpressionKind::If {
+                if_expr: Box::new(expr),
+                then_block: Box::new(Expression {
+                    kind: ExpressionKind::Block(then_block.clone()),
+                    span: then_block.span,
+                }),
+                else_block: Some(Box::new(Expression {
+                    kind: ExpressionKind::Block(else_block.clone()),
+                    span: else_block.span,
+                })),
+            },
+            span: span,
         }),
-        None => Ok(Expression::If {
-            if_expr: Box::new(expr),
-            then_block: Box::new(Expression::Block(then_block)),
-            else_block: None,
+        None => Ok(Expression {
+            kind: ExpressionKind::If {
+                if_expr: Box::new(expr),
+                then_block: Box::new(Expression {
+                    kind: ExpressionKind::Block(then_block.clone()),
+                    span: then_block.span,
+                }),
+                else_block: None,
+            },
+            span: span,
         }),
     }
 }

@@ -5,7 +5,7 @@ use anyhow::{Context, Result};
 use crate::{
     ast::block::Block,
     errors::ParserError,
-    lexer::token::{KeywordKind, PuncuationKind, Token},
+    lexer::token::{KeywordKind, PuncuationKind, Token, TokenKind},
     parser::Parser,
 };
 
@@ -23,13 +23,13 @@ impl FuncItem {
     pub fn parse(parser: &mut Parser) -> Result<FuncItem> {
         let name: String;
         let next = parser.peek()?;
-        match next {
-            Token::Keyword(KeywordKind::Func) => parser.consume()?,
+        match next.kind {
+            TokenKind::Keyword(KeywordKind::Func) => parser.consume()?,
             _ => return Err(ParserError::UnexpectedEndOfInput.into()),
         };
         let next = parser.peek()?;
-        match next {
-            Token::Ident(id) => {
+        match &next.kind {
+            TokenKind::Ident(id) => {
                 name = id.clone();
                 parser.consume()?;
             }
@@ -41,8 +41,8 @@ impl FuncItem {
             }
         }
         let next = parser.peek()?;
-        match next {
-            Token::Punctuation(PuncuationKind::LeftParen) => parser.consume()?,
+        match next.kind {
+            TokenKind::Punctuation(PuncuationKind::LeftParen) => parser.consume()?,
             _ => {
                 return Err(ParserError::UnexpectedToken {
                     token: next.clone(),
@@ -51,8 +51,8 @@ impl FuncItem {
             }
         };
         let next = parser.peek()?;
-        match next {
-            Token::Punctuation(PuncuationKind::RightParen) => parser.consume()?,
+        match next.kind {
+            TokenKind::Punctuation(PuncuationKind::RightParen) => parser.consume()?,
             _ => {
                 return Err(ParserError::UnexpectedToken {
                     token: next.clone(),
@@ -61,8 +61,8 @@ impl FuncItem {
             }
         };
         let next = parser.peek()?;
-        match next {
-            Token::Punctuation(PuncuationKind::LeftCurlyParen) => {}
+        match next.kind {
+            TokenKind::Punctuation(PuncuationKind::LeftCurlyParen) => {}
             _ => {
                 return Err(ParserError::UnexpectedToken {
                     token: next.clone(),

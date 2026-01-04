@@ -1,6 +1,7 @@
 use anyhow::{Ok, Result};
 
-use crate::lexer::token::{OperatorKind, Token};
+use crate::errors::span::Span;
+use crate::lexer::token::{OperatorKind, Token, TokenKind};
 use crate::{
     errors::LexerError,
     lexer::token::{KeywordKind, PuncuationKind},
@@ -14,6 +15,7 @@ pub mod token;
 pub struct Lexer<'a> {
     chars: Peekable<Chars<'a>>,
     pub output: Vec<Token>,
+    cursor: usize,
 }
 
 impl<'a> Lexer<'a> {
@@ -21,13 +23,20 @@ impl<'a> Lexer<'a> {
         Lexer {
             chars: input.chars().peekable(),
             output: Vec::new(),
+            cursor: 0,
         }
     }
 
     pub fn lex(&mut self) {
         while let Some(tok) = self.next() {
-            if tok == Token::EOF {
-                self.output.push(Token::EOF);
+            if tok.kind == TokenKind::EOF {
+                self.output.push(Token {
+                    kind: TokenKind::EOF,
+                    span: Span {
+                        start: self.cursor,
+                        end: self.cursor,
+                    },
+                });
                 break;
             } else {
                 self.output.push(tok);
@@ -35,39 +44,39 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    fn read_number(&mut self) -> Result<Token> {
+    fn read_number(&mut self) -> Result<TokenKind> {
         let mut number = String::new();
         while let Some(c) = self.chars.peek() {
             if c.is_digit(10) {
                 number.push(*c);
-                self.chars.next();
+                self.bump();
             } else {
                 break;
             }
         }
-        Ok(Token::Number(number.parse().unwrap()))
+        Ok(TokenKind::Number(number.parse().unwrap()))
     }
 
-    fn match_keyword(&mut self, ident: &str) -> Token {
+    fn match_keyword(&mut self, ident: &str) -> TokenKind {
         match ident {
-            "if" => Token::Keyword(KeywordKind::If),
-            "else" => Token::Keyword(KeywordKind::Else),
-            "while" => Token::Keyword(KeywordKind::While),
-            "for" => Token::Keyword(KeywordKind::For),
-            "return" => Token::Keyword(KeywordKind::Return),
-            "func" => Token::Keyword(KeywordKind::Func),
-            "struct" => Token::Keyword(KeywordKind::Struct),
-            "let" => Token::Keyword(KeywordKind::Let),
-            _ => Token::Ident(ident.to_string()),
+            "if" => TokenKind::Keyword(KeywordKind::If),
+            "else" => TokenKind::Keyword(KeywordKind::Else),
+            "while" => TokenKind::Keyword(KeywordKind::While),
+            "for" => TokenKind::Keyword(KeywordKind::For),
+            "return" => TokenKind::Keyword(KeywordKind::Return),
+            "func" => TokenKind::Keyword(KeywordKind::Func),
+            "struct" => TokenKind::Keyword(KeywordKind::Struct),
+            "let" => TokenKind::Keyword(KeywordKind::Let),
+            _ => TokenKind::Ident(ident.to_string()),
         }
     }
 
-    fn read_identifier(&mut self) -> Result<Token> {
+    fn read_identifier(&mut self) -> Result<TokenKind> {
         let mut identifier = String::new();
         while let Some(c) = self.chars.peek() {
             if c.is_alphanumeric() || *c == '_' {
                 identifier.push(*c);
-                self.chars.next();
+                self.bump();
             } else {
                 break;
             }
@@ -78,11 +87,17 @@ impl<'a> Lexer<'a> {
     fn skip_whitespace(&mut self) {
         while let Some(c) = self.chars.peek() {
             if c.is_whitespace() {
-                self.chars.next();
+                self.bump();
             } else {
                 break;
             }
         }
+    }
+
+    fn bump(&mut self) -> Option<char> {
+        let c = self.chars.next()?;
+        self.cursor += c.len_utf8();
+        Some(c)
     }
 }
 
@@ -91,41 +106,58 @@ impl Iterator for Lexer<'_> {
 
     fn next(&mut self) -> Option<Self::Item> {
         self.skip_whitespace();
+        let start = self.cursor;
         let mut do_next: bool = true;
         let c = match self.chars.peek() {
             Some(c) => c,
-            None => return Some(Token::EOF),
+            None => {
+                return Some(Token {
+                    kind: TokenKind::EOF,
+                    span: Span {
+                        start: self.cursor,
+                        end: self.cursor + 1,
+                    },
+                });
+            }
         };
-        let tok: Result<Token> = match *c {
-            '(' => Ok(Token::Punctuation(PuncuationKind::LeftParen)),
-            ')' => Ok(Token::Punctuation(PuncuationKind::RightParen)),
-            '{' => Ok(Token::Punctuation(PuncuationKind::LeftCurlyParen)),
-            '}' => Ok(Token::Punctuation(PuncuationKind::RightCurlyParen)),
-            '[' => Ok(Token::Punctuation(PuncuationKind::LeftSquareParen)),
-            ']' => Ok(Token::Punctuation(PuncuationKind::RightSquareParen)),
-            ':' => Ok(Token::Punctuation(PuncuationKind::Colon)),
-            ';' => Ok(Token::Punctuation(PuncuationKind::SemiColon)),
-            ',' => Ok(Token::Punctuation(PuncuationKind::Comma)),
+        let tok: Result<TokenKind> = match *c {
+            '(' => Ok(TokenKind::Punctuation(PuncuationKind::LeftParen)),
+            ')' => Ok(TokenKind::Punctuation(PuncuationKind::RightParen)),
+            '{' => Ok(TokenKind::Punctuation(PuncuationKind::LeftCurlyParen)),
+            '}' => Ok(TokenKind::Punctuation(PuncuationKind::RightCurlyParen)),
+            '[' => Ok(TokenKind::Punctuation(PuncuationKind::LeftSquareParen)),
+            ']' => Ok(TokenKind::Punctuation(PuncuationKind::RightSquareParen)),
+            ':' => Ok(TokenKind::Punctuation(PuncuationKind::Colon)),
+            ';' => Ok(TokenKind::Punctuation(PuncuationKind::SemiColon)),
+            ',' => Ok(TokenKind::Punctuation(PuncuationKind::Comma)),
             '=' => {
-                self.chars.next();
+                self.bump();
                 do_next = false;
                 let n = match self.chars.peek() {
                     Some(n) => n,
-                    None => return Some(Token::EOF),
+                    None => {
+                        return Some(Token {
+                            kind: TokenKind::EOF,
+                            span: Span {
+                                start: self.cursor,
+                                end: self.cursor,
+                            },
+                        });
+                    }
                 };
                 match *n {
-                    '=' => Ok(Token::Operator(OperatorKind::EqualEqual)),
-                    _ => Ok(Token::Operator(OperatorKind::Equal)),
+                    '=' => Ok(TokenKind::Operator(OperatorKind::EqualEqual)),
+                    _ => Ok(TokenKind::Operator(OperatorKind::Equal)),
                 }
             }
-            '+' => Ok(Token::Operator(OperatorKind::Plus)),
-            '-' => Ok(Token::Operator(OperatorKind::Minus)),
-            '*' => Ok(Token::Operator(OperatorKind::Star)),
-            '/' => Ok(Token::Operator(OperatorKind::Slash)),
-            '%' => Ok(Token::Operator(OperatorKind::Percent)),
-            '<' => Ok(Token::Operator(OperatorKind::Less)),
-            '>' => Ok(Token::Operator(OperatorKind::Greater)),
-            '!' => Ok(Token::Operator(OperatorKind::Bang)),
+            '+' => Ok(TokenKind::Operator(OperatorKind::Plus)),
+            '-' => Ok(TokenKind::Operator(OperatorKind::Minus)),
+            '*' => Ok(TokenKind::Operator(OperatorKind::Star)),
+            '/' => Ok(TokenKind::Operator(OperatorKind::Slash)),
+            '%' => Ok(TokenKind::Operator(OperatorKind::Percent)),
+            '<' => Ok(TokenKind::Operator(OperatorKind::Less)),
+            '>' => Ok(TokenKind::Operator(OperatorKind::Greater)),
+            '!' => Ok(TokenKind::Operator(OperatorKind::Bang)),
             _ => {
                 if c.is_alphabetic() {
                     do_next = false; // read_identifier performs self.chars.next() to stop doing it twice we need this flag
@@ -138,10 +170,13 @@ impl Iterator for Lexer<'_> {
                 }
             }
         };
-
         if do_next {
-            self.chars.next();
+            self.bump();
         }
-        return Some(tok.unwrap());
+        let end = self.cursor;
+        return Some(Token {
+            kind: tok.unwrap(),
+            span: Span { start, end },
+        });
     }
 }

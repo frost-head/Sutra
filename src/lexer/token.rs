@@ -1,7 +1,15 @@
 use std::fmt::{self};
 
+use crate::errors::span::Span;
+
 #[derive(Debug, PartialEq, Clone)]
-pub enum Token {
+pub struct Token {
+    pub kind: TokenKind,
+    pub span: Span,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum TokenKind {
     Operator(OperatorKind),
     Keyword(KeywordKind),
     Punctuation(PuncuationKind),
@@ -51,14 +59,19 @@ pub enum KeywordKind {
 
 impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Token : {}, {}", self.kind, self.span)
+    }
+}
+impl fmt::Display for TokenKind {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Token::Operator(operator_kind) => write!(f, "{}", operator_kind),
-            Token::Keyword(keyword_kind) => write!(f, "{}", keyword_kind),
-            Token::Punctuation(punctuation_kind) => write!(f, "{}", punctuation_kind),
-            Token::Illegal => write!(f, "Illegal token"),
-            Token::Ident(ident) => write!(f, "Ident('{}')", ident),
-            Token::Number(num) => write!(f, "Num({})", num),
-            Token::EOF => write!(f, "End Of File"),
+            TokenKind::Operator(operator_kind) => write!(f, "{}", operator_kind),
+            TokenKind::Keyword(keyword_kind) => write!(f, "{}", keyword_kind),
+            TokenKind::Punctuation(punctuation_kind) => write!(f, "{}", punctuation_kind),
+            TokenKind::Illegal => write!(f, "Illegal token"),
+            TokenKind::Ident(ident) => write!(f, "Ident('{}')", ident),
+            TokenKind::Number(num) => write!(f, "Num({})", num),
+            TokenKind::EOF => write!(f, "End Of File"),
         }
     }
 }
