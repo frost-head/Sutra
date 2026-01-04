@@ -1,5 +1,7 @@
-use crate::lexer::token::Token;
+use crate::lexer::token::{Token, TokenKind};
 use thiserror::Error;
+
+pub mod span;
 
 #[derive(Error, Debug)]
 pub enum LexerError {
@@ -12,12 +14,12 @@ pub enum LexerError {
 
 #[derive(Error, Debug)]
 pub enum ParserError {
-    #[error("Unexpected token: {}", token)]
+    #[error("Unexpected token: {},\nError: {}", token.kind, token.span)]
     UnexpectedToken { token: Token },
 
     #[error("Unexpected end of input")]
     UnexpectedEndOfInput,
 
-    #[error("Expected token: {}, Got : {}", kind, got)]
-    ExpectedTokenGotUnexpected { kind: Token, got: Token },
+    #[error("Expected token: {}, Got : {},\nError : {}", kind, got.kind, got.span)]
+    ExpectedTokenGotUnexpected { kind: TokenKind, got: Token },
 }

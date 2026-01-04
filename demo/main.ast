@@ -1,20 +1,20 @@
 function main() 
 {
     Let Statement:
-      Identifier: Ident('x')
+      Identifier: x
       Value: ((5 * 8) + 3) 
     Let Statement:
-      Identifier: Ident('y')
+      Identifier: y
       Value: if : (x < y) then {
         Let Statement:
-          Identifier: Ident('y')
-          Value: 2 
+          Identifier: y
+          Value: (- 2) 
     } 
     if : (x < y) then {
         ident x binds 2 
     } else : {
         Let Statement:
-          Identifier: Ident('x')
+          Identifier: x
           Value: 3 
     } 
     Return Statement:

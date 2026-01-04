@@ -1,7 +1,7 @@
 use crate::{
-    ast::expression::{Expression, if_expr::parse_if},
-    errors::ParserError,
-    lexer::token::{KeywordKind, OperatorKind, PuncuationKind, Token},
+    ast::expression::{Expression, ExpressionKind, if_expr::parse_if},
+    errors::{ParserError, span::Span},
+    lexer::token::{KeywordKind, OperatorKind, PuncuationKind, TokenKind},
     parser::Parser,
 };
 use anyhow::{Context, Ok, Result};
@@ -12,45 +12,81 @@ impl Expression {
     }
 
     pub fn parse_prefix(parser: &mut Parser) -> Result<Expression> {
-        let new = parser.consume()?;
-        match new {
-            Token::Number(num) => Ok(Expression::Literal { literal: num }),
-            Token::Ident(ident) => Ok(Expression::Ident { identifier: ident }),
-            Token::Keyword(KeywordKind::If) => Ok(parse_if(parser)?),
-            Token::Operator(OperatorKind::Bang) => {
-                let expr =
-                    Self::parse_expression(parser, 8).context("Could not parse expression")?;
-                Ok(Expression::Unary {
-                    operator: OperatorKind::Bang,
-                    operand: Box::new(expr),
+        let token = parser.peek()?.clone();
+
+        match &token.kind {
+            TokenKind::Number(num) => {
+                parser.consume()?;
+                Ok(Expression {
+                    kind: ExpressionKind::Literal {
+                        literal: num.clone(),
+                    },
+                    span: token.span,
                 })
             }
-            Token::Operator(OperatorKind::Minus) => {
-                let expr =
-                    Self::parse_expression(parser, 8).context("Could not parse expression")?;
-                Ok(Expression::Unary {
-                    operator: OperatorKind::Minus,
-                    operand: Box::new(expr),
+
+            TokenKind::Ident(ident) => {
+                parser.consume()?;
+                Ok(Expression {
+                    kind: ExpressionKind::Ident {
+                        identifier: ident.clone(),
+                    },
+                    span: token.span,
                 })
             }
-            Token::Punctuation(PuncuationKind::LeftParen) => {
+
+            TokenKind::Keyword(KeywordKind::If) => {
+                parse_if(parser)
+            }
+
+            TokenKind::Operator(OperatorKind::Bang) => {
+                let tok = parser.consume()?; // consume `!`
+
+                let rhs =
+                    Self::parse_expression(parser, 8).context("Could not parse unary operand")?;
+
+                Ok(Expression {
+                    span: Span::merge(tok.span, rhs.span),
+                    kind: ExpressionKind::Unary {
+                        operator: OperatorKind::Bang,
+                        operand: Box::new(rhs),
+                    },
+                })
+            }
+
+            TokenKind::Operator(OperatorKind::Minus) => {
+                let tok = parser.consume()?; // consume `-`
+
+                let rhs =
+                    Self::parse_expression(parser, 8).context("Could not parse unary operand")?;
+
+                Ok(Expression {
+                    span: Span::merge(tok.span, rhs.span),
+                    kind: ExpressionKind::Unary {
+                        operator: OperatorKind::Minus, // ❗ FIXED
+                        operand: Box::new(rhs),
+                    },
+                })
+            }
+
+            TokenKind::Punctuation(PuncuationKind::LeftParen) => {
+                parser.consume()?; // consume '('
+
                 let expr = Self::parse_expression(parser, 0)?;
-                parser.expect(Token::Punctuation(PuncuationKind::RightParen))?;
+                parser.expect(TokenKind::Punctuation(PuncuationKind::RightParen))?;
                 Ok(expr)
             }
 
-            _ => {
-                return Err(ParserError::UnexpectedToken { token: new.clone() }.into());
-            }
+            _ => Err(ParserError::UnexpectedToken { token }.into()),
         }
     }
 
     pub fn parse_expression(parser: &mut Parser, min_bp: u8) -> Result<Expression> {
         let mut lhs = Self::parse_prefix(parser).context("Could not parse lhs")?;
-
+        let mut span = lhs.clone().span;
         loop {
-            let op = match parser.peek()? {
-                Token::Operator(operator_kind) => operator_kind,
+            let op = match &parser.peek()?.kind {
+                TokenKind::Operator(operator_kind) => operator_kind,
                 _ => break,
             };
             let oprator = op.clone();
@@ -61,10 +97,14 @@ impl Expression {
             }
             parser.consume()?;
             let rhs = Self::parse_expression(parser, r_bp).context("Could not parse rhs")?;
-            lhs = Expression::Binary {
-                left: Box::new(lhs),
-                operator: oprator,
-                right: Box::new(rhs),
+            span = Span::merge(span, rhs.clone().span);
+            lhs = Expression {
+                kind: ExpressionKind::Binary {
+                    left: Box::new(lhs),
+                    operator: oprator,
+                    right: Box::new(rhs),
+                },
+                span,
             };
         }
         Ok(lhs)

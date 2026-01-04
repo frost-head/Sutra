@@ -3,7 +3,7 @@ use anyhow::{Context, Result};
 use crate::ast::item::Item;
 use crate::ast::item::function::FuncItem;
 use crate::errors::ParserError;
-use crate::lexer::token::KeywordKind;
+use crate::lexer::token::{KeywordKind, TokenKind};
 use crate::{
     ast::Ast,
     lexer::{Lexer, token::Token},
@@ -25,9 +25,9 @@ impl<'a> Parser<'a> {
 
     pub fn parse(&mut self) -> Result<()> {
         while let Some(next) = self.tokens.peek() {
-            match next {
-                Token::EOF => break,
-                Token::Keyword(KeywordKind::Func) => {
+            match next.kind {
+                TokenKind::EOF => break,
+                TokenKind::Keyword(KeywordKind::Func) => {
                     let func_item =
                         FuncItem::parse(self).context("Error while parsing function")?;
                     self.ast.items.push(Item::Function(func_item));
@@ -57,10 +57,10 @@ impl<'a> Parser<'a> {
             .context("Could not consume the next token");
     }
 
-    pub fn expect(&mut self, expected: Token) -> Result<()> {
+    pub fn expect(&mut self, expected: TokenKind) -> Result<Token> {
         let tok = self.consume()?;
-        if tok == expected {
-            Ok(())
+        if tok.kind == expected {
+            Ok(tok)
         } else {
             Err(ParserError::ExpectedTokenGotUnexpected {
                 kind: expected,

@@ -1,5 +1,6 @@
 use crate::{
     ast::{block::Block, expression::assign::Identifier},
+    errors::span::Span,
     lexer::token::OperatorKind,
 };
 use core::fmt;
@@ -8,7 +9,13 @@ pub mod if_expr;
 mod parse;
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum Expression {
+pub struct Expression {
+    pub kind: ExpressionKind,
+    pub span: Span,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ExpressionKind {
     Literal {
         literal: i64,
     },
@@ -41,17 +48,23 @@ pub enum Expression {
 
 impl fmt::Display for Expression {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.kind)
+    }
+}
+
+impl fmt::Display for ExpressionKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Expression::Literal { literal } => write!(f, "{}", literal),
-            Expression::Binary {
+            ExpressionKind::Literal { literal } => write!(f, "{}", literal),
+            ExpressionKind::Binary {
                 operator,
                 left,
                 right,
             } => write!(f, "({} {} {})", left, operator, right),
-            Expression::Grouped { expression } => write!(f, "({})", expression),
-            Expression::Unary { operator, operand } => write!(f, "({} {})", operator, operand),
-            Expression::Ident { identifier } => write!(f, "{}", identifier),
-            Expression::If {
+            ExpressionKind::Grouped { expression } => write!(f, "({})", expression),
+            ExpressionKind::Unary { operator, operand } => write!(f, "({} {})", operator, operand),
+            ExpressionKind::Ident { identifier } => write!(f, "{}", identifier),
+            ExpressionKind::If {
                 if_expr,
                 then_block,
                 else_block,
@@ -67,8 +80,10 @@ impl fmt::Display for Expression {
                     }
                 )
             }
-            Expression::Block(block) => write!(f, "{}", block),
-            Expression::Assign { target, value } => write!(f, "ident {} binds {}", target, value),
+            ExpressionKind::Block(block) => write!(f, "{}", block),
+            ExpressionKind::Assign { target, value } => {
+                write!(f, "ident {} binds {}", target, value)
+            }
         }
     }
 }

@@ -19,7 +19,7 @@ fn main() -> Result<()> {
             Item::Function(func_item) => {
                 output_buffer.push_str(&func_item.to_string());
             }
-            Item::Struct() => {
+            _ => {
                 eprintln!("Error occured while parsing the input");
                 std::process::exit(1);
             }
