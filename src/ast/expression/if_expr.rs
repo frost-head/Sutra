@@ -10,13 +10,14 @@ use crate::{
 use anyhow::{Ok, Result};
 
 pub fn parse_if(parser: &mut Parser) -> Result<Expression> {
+    let if_expr = parser.expect(TokenKind::Keyword(KeywordKind::If))?;
     let expr = Expression::parse_expression(parser, 0)?;
 
     let then_block = Block::parse(parser)?;
 
     let mut else_block = None;
 
-    let mut span = Span::merge(expr.span, then_block.span);
+    let mut span = Span::merge(if_expr.span, then_block.span);
     if parser.peek()?.kind == TokenKind::Keyword(KeywordKind::Else) {
         parser.consume()?;
         let block = Block::parse(parser)?;

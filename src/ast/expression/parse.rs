@@ -12,51 +12,72 @@ impl Expression {
     }
 
     pub fn parse_prefix(parser: &mut Parser) -> Result<Expression> {
-        let new = parser.consume()?;
-        match new.kind {
-            TokenKind::Number(num) => Ok(Expression {
-                kind: ExpressionKind::Literal { literal: num },
-                span: new.span,
-            }),
-            TokenKind::Ident(ident) => Ok(Expression {
-                kind: ExpressionKind::Ident { identifier: ident },
-                span: new.span,
-            }),
-            TokenKind::Keyword(KeywordKind::If) => Ok(parse_if(parser)?),
-            TokenKind::Operator(OperatorKind::Bang) => {
-                let expr =
-                    Self::parse_expression(parser, 8).context("Could not parse expression")?;
+        let token = parser.peek()?.clone();
 
-                let span = expr.clone().span;
+        match &token.kind {
+            TokenKind::Number(num) => {
+                parser.consume()?;
                 Ok(Expression {
-                    kind: ExpressionKind::Unary {
-                        operator: OperatorKind::Bang,
-                        operand: Box::new(expr),
+                    kind: ExpressionKind::Literal {
+                        literal: num.clone(),
                     },
-                    span,
+                    span: token.span,
                 })
             }
+
+            TokenKind::Ident(ident) => {
+                parser.consume()?;
+                Ok(Expression {
+                    kind: ExpressionKind::Ident {
+                        identifier: ident.clone(),
+                    },
+                    span: token.span,
+                })
+            }
+
+            TokenKind::Keyword(KeywordKind::If) => {
+                parse_if(parser)
+            }
+
+            TokenKind::Operator(OperatorKind::Bang) => {
+                let tok = parser.consume()?; // consume `!`
+
+                let rhs =
+                    Self::parse_expression(parser, 8).context("Could not parse unary operand")?;
+
+                Ok(Expression {
+                    span: Span::merge(tok.span, rhs.span),
+                    kind: ExpressionKind::Unary {
+                        operator: OperatorKind::Bang,
+                        operand: Box::new(rhs),
+                    },
+                })
+            }
+
             TokenKind::Operator(OperatorKind::Minus) => {
-                let expr =
-                    Self::parse_expression(parser, 8).context("Could not parse expression")?;
-                let span = expr.clone().span;
+                let tok = parser.consume()?; // consume `-`
+
+                let rhs =
+                    Self::parse_expression(parser, 8).context("Could not parse unary operand")?;
+
                 Ok(Expression {
+                    span: Span::merge(tok.span, rhs.span),
                     kind: ExpressionKind::Unary {
-                        operator: OperatorKind::Bang,
-                        operand: Box::new(expr),
+                        operator: OperatorKind::Minus, // ❗ FIXED
+                        operand: Box::new(rhs),
                     },
-                    span,
                 })
             }
+
             TokenKind::Punctuation(PuncuationKind::LeftParen) => {
+                parser.consume()?; // consume '('
+
                 let expr = Self::parse_expression(parser, 0)?;
                 parser.expect(TokenKind::Punctuation(PuncuationKind::RightParen))?;
                 Ok(expr)
             }
 
-            _ => {
-                return Err(ParserError::UnexpectedToken { token: new.clone() }.into());
-            }
+            _ => Err(ParserError::UnexpectedToken { token }.into()),
         }
     }
 

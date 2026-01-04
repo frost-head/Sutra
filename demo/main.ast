@@ -8,16 +8,15 @@ function main()
       Value: if : (x < y) then {
         Let Statement:
           Identifier: y
-          Value: 2 
+          Value: (- 2) 
     } 
-    if : if : (x < y) then {
+    if : (x < y) then {
         ident x binds 2 
     } else : {
         Let Statement:
           Identifier: x
           Value: 3 
-    } then {
-        Return Statement:
-            Value: c 
     } 
+    Return Statement:
+        Value: c 
 }

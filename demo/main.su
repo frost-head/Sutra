@@ -1,7 +1,7 @@
 func main() {
     let x = (5 * 8) + 3;
     let y = if (x < y) {
-        let y = 2;
+        let y = -2;
     };
 
     if (x < y) {
