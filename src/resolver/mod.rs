@@ -1,8 +1,10 @@
 use std::collections::HashMap;
 
+use anyhow::{Context, Result};
+
 use crate::resolver::{
     scope::{Scope, ScopeId},
-    symbol::Symbol,
+    symbol::{Symbol, SymbolId},
 };
 
 pub mod scope;
@@ -21,15 +23,35 @@ impl Resolver {
         let mut symbols = Vec::new();
         let cur_scope = ScopeId(0);
 
-        scopes.push(Scope {
-            symbols: HashMap::new(),
-            parent: None,
-        });
-
         Resolver {
             scopes,
             symbols,
             cur_scope,
         }
+    }
+
+    pub fn enter_scope(&mut self, parent: Option<ScopeId>) -> ScopeId {
+        let id = ScopeId(self.scopes.len());
+        self.scopes.push(Scope {
+            symbols: HashMap::new(),
+            parent,
+        });
+        self.cur_scope = id.clone();
+        id
+    }
+
+    pub fn exit_scope(&mut self) -> Result<()> {
+        let parent = self.scopes[self.cur_scope.0].parent;
+        self.cur_scope = parent.context("Failed to exit scope")?;
+        Ok(())
+    }
+
+    pub fn declare_symbol(&mut self, symbol: Symbol) {
+        let symbol_id = self.symbols.len();
+        self.symbols.push(symbol.clone());
+
+        self.scopes[self.cur_scope.0]
+            .symbols
+            .insert(symbol.name, SymbolId(symbol_id));
     }
 }

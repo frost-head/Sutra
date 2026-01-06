@@ -1,6 +1,7 @@
 use crate::resolver::symbol::SymbolId;
 use std::collections::HashMap;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ScopeId(pub usize);
 
 pub struct Scope {
