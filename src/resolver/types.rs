@@ -5,7 +5,6 @@ pub struct TypeId(pub usize);
 pub enum TypeKind {
     Int,
     Bool,
-    Float,
     Pointer(TypeId),
     Function {
         params: Vec<TypeId>,

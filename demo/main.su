@@ -12,3 +12,7 @@ func main() {
     }
     return c;
 }
+
+func add(a: int, b: int, c : bool) -> int {
+    return a + b;
+}
