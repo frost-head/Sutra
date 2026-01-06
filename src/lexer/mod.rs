@@ -67,6 +67,8 @@ impl<'a> Lexer<'a> {
             "func" => TokenKind::Keyword(KeywordKind::Func),
             "struct" => TokenKind::Keyword(KeywordKind::Struct),
             "let" => TokenKind::Keyword(KeywordKind::Let),
+            "int" => TokenKind::Keyword(KeywordKind::Int),
+            "bool" => TokenKind::Keyword(KeywordKind::Bool),
             _ => TokenKind::Ident(ident.to_string()),
         }
     }
