@@ -1,30 +1,35 @@
 use std::collections::HashMap;
 
-pub struct Symbol {
-    pub name: String,
-    pub kind: SymbolKind,
-    pub type_id: TypeId,
-    pub scope_id: ScopeId,
-    pub mutable: bool,
-}
+use crate::resolver::{
+    scope::{Scope, ScopeId},
+    symbol::Symbol,
+};
 
-pub enum SymbolKind {
-    Function,
-    Variable,
-    Type,
-}
-
-pub struct ScopeId(usize);
-pub struct TypeId(usize);
-pub struct SymbolId(usize);
-
-pub struct Scope {
-    symbols: HashMap<String, SymbolId>,
-    parent: Option<ScopeId>,
-}
+pub mod scope;
+pub mod symbol;
+pub mod types;
 
 pub struct Resolver {
-    scopes: Vec<Scope>,
-    symbols: Vec<Symbol>,
-    cur_scope: ScopeId,
+    pub scopes: Vec<Scope>,
+    pub symbols: Vec<Symbol>,
+    pub cur_scope: ScopeId,
+}
+
+impl Resolver {
+    pub fn new() -> Self {
+        let mut scopes = Vec::new();
+        let mut symbols = Vec::new();
+        let cur_scope = ScopeId(0);
+
+        scopes.push(Scope {
+            symbols: HashMap::new(),
+            parent: None,
+        });
+
+        Resolver {
+            scopes,
+            symbols,
+            cur_scope,
+        }
+    }
 }
