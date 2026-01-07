@@ -1,6 +1,6 @@
 use crate::{
     ast::types::TypeRef,
-    errors::ParserError,
+    errors::{ParserError, span::Span},
     lexer::token::{PuncuationKind, TokenKind},
     parser::Parser,
 };
@@ -10,6 +10,7 @@ use core::fmt;
 pub struct Param {
     pub name: String,
     pub type_ref: TypeRef,
+    pub span: Span,
 }
 
 impl fmt::Display for Param {
@@ -24,6 +25,7 @@ impl Param {
         while TokenKind::Punctuation(PuncuationKind::RightParen) != parser.peek()?.kind {
             let name: String;
             let tok = parser.peek()?;
+            let mut span = tok.span.clone();
             match &tok.kind {
                 TokenKind::Ident(id) => {
                     name = id.clone();
@@ -41,11 +43,20 @@ impl Param {
             parser.expect(TokenKind::Punctuation(PuncuationKind::Colon))?;
 
             let type_ref = TypeRef::parse_type_ref(parser)?;
-
+            span = Span::merge(
+                span,
+                match type_ref.clone() {
+                    TypeRef::Name { name: _name, span } => span,
+                },
+            );
             if parser.peek()?.kind != TokenKind::Punctuation(PuncuationKind::RightParen) {
                 parser.expect(TokenKind::Punctuation(PuncuationKind::Comma))?;
             }
-            params.push(Param { name, type_ref });
+            params.push(Param {
+                name,
+                type_ref,
+                span,
+            });
         }
         parser.expect(TokenKind::Punctuation(PuncuationKind::RightParen))?;
         Ok(params)

@@ -1,8 +1,9 @@
-use crate::{ast::types::TypeRef, lexer::token::OperatorKind, parser::Parser};
+use crate::{ast::types::TypeRef, errors::span::Span, lexer::token::OperatorKind, parser::Parser};
 use anyhow::Result;
 
 pub struct FnReturn {
     pub type_ref: TypeRef,
+    pub span: Span,
 }
 
 impl std::fmt::Display for FnReturn {
@@ -20,7 +21,10 @@ impl FnReturn {
             OperatorKind::Greater,
         ))?;
         let type_ref = TypeRef::parse_type_ref(parser)?;
+        let span = match type_ref.clone() {
+            TypeRef::Name { name: _name, span } => span,
+        };
 
-        Ok(FnReturn { type_ref })
+        Ok(FnReturn { type_ref, span })
     }
 }
