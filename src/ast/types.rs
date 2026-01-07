@@ -6,6 +6,7 @@ use crate::{
 use anyhow::Result;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
+#[derive(Debug, Clone)]
 pub enum TypeRef {
     Name { name: String, span: Span },
 }
