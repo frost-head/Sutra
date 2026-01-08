@@ -14,6 +14,7 @@ use crate::{
 pub mod fn_params;
 pub mod fn_return;
 
+#[derive(Debug, Clone)]
 pub struct FuncItem {
     pub name: String,
     pub params: Option<Vec<Param>>,

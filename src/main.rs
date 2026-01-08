@@ -3,7 +3,7 @@ use clap::Parser as clap_parser;
 use std::fs;
 use sutra::parser::Parser;
 use sutra::resolver::Resolver;
-use sutra::resolver::types::TypeTable;
+use sutra::resolver::types::{TypeId, TypeKind, TypeTable};
 use sutra::{ast::item::Item, lexer::Lexer};
 
 fn main() -> Result<()> {
@@ -22,7 +22,7 @@ fn main() -> Result<()> {
                 output_buffer.push_str(&func_item.to_string());
             }
             _ => {
-                eprintln!("Error occured while parsing the input");
+                eprintln!("Error occurred while parsing the input");
                 std::process::exit(1);
             }
         }
@@ -30,8 +30,43 @@ fn main() -> Result<()> {
 
     write_file(output_buffer);
 
-    let type_table = TypeTable::new();
+    let mut type_table = TypeTable::new();
     let resolver = Resolver::new();
+
+    let ast = parser.ast.clone();
+
+    for item in &ast.items {
+        match item {
+            Item::Function(func_item) => {
+                let mut return_id = None;
+                let mut param_ids: Option<Vec<TypeId>> = None;
+                if let Some(return_type) = func_item.return_type.clone() {
+                    return_id = Some(type_table.type_ref_to_type(return_type.type_ref)?);
+                }
+                if let Some(param_types) = func_item.params.clone() {
+                    param_ids = Some(
+                        param_types
+                            .into_iter()
+                            .map(|param_type| -> Result<TypeId> {
+                                Ok(type_table.type_ref_to_type(param_type.type_ref)?)
+                            })
+                            .collect::<Result<Vec<TypeId>>>()?,
+                    );
+                }
+
+                let func_id = TypeKind::Function {
+                    params: param_ids,
+                    ret: return_id,
+                };
+                let func_id = type_table.intern(func_id);
+                println!("Function ID: {:?}", func_id);
+            }
+            _ => {
+                eprintln!("Error occurred while parsing the input");
+                std::process::exit(1);
+            }
+        }
+    }
 
     Ok(())
 }

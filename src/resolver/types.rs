@@ -1,3 +1,6 @@
+use crate::{ast::types::TypeRef, errors::TypeRefError};
+use anyhow::Result;
+
 #[derive(Debug, Clone)]
 pub struct TypeId(pub usize);
 
@@ -7,8 +10,8 @@ pub enum TypeKind {
     Bool,
     Pointer(TypeId),
     Function {
-        params: Vec<TypeId>,
-        ret: TypeId,
+        params: Option<Vec<TypeId>>,
+        ret: Option<TypeId>,
     },
     Struct {
         name: String,
@@ -37,5 +40,19 @@ impl TypeTable {
         let id = TypeId(self.types.len());
         self.types.push(Type { kind });
         id
+    }
+
+    pub fn type_ref_to_type(&mut self, ty: TypeRef) -> Result<TypeId> {
+        match ty {
+            TypeRef::Named {
+                name: _name,
+                span: _span,
+            } => {
+                let type_id = self.intern(TypeKind::Int);
+                Ok(type_id)
+            }
+
+            _ => Err(TypeRefError::InvalidTypeReference { type_ref: ty }.into()),
+        }
     }
 }

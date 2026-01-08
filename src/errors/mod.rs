@@ -1,4 +1,7 @@
-use crate::lexer::token::{Token, TokenKind};
+use crate::{
+    ast::types::TypeRef,
+    lexer::token::{Token, TokenKind},
+};
 use thiserror::Error;
 
 pub mod span;
@@ -22,4 +25,12 @@ pub enum ParserError {
 
     #[error("Expected token: {}, Got : {},\nError : {}", kind, got.kind, got.span)]
     ExpectedTokenGotUnexpected { kind: TokenKind, got: Token },
+}
+
+pub enum ResolverError {}
+
+#[derive(Error, Debug)]
+pub enum TypeRefError {
+    #[error("Invalid type reference, \nError: {:?}", type_ref.print_span())]
+    InvalidTypeReference { type_ref: TypeRef },
 }

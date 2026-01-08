@@ -54,4 +54,17 @@ impl Resolver {
             .symbols
             .insert(symbol.name, SymbolId(symbol_id));
     }
+    
+    pub fn resolve_symbol(&self, name: &str) -> Option<SymbolId> {
+        let mut current_scope = self.cur_scope;
+
+        while let Some(scope) = self.scopes.get(current_scope.0) {
+            if let Some(symbol_id) = scope.symbols.get(name) {
+                return Some(symbol_id.clone());
+            }
+            current_scope = scope.parent?;
+        }
+
+        None
+    }
 }

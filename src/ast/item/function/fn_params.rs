@@ -1,12 +1,13 @@
 use crate::{
     ast::types::TypeRef,
-    errors::{ParserError, span::Span},
+    errors::{ParserError, TypeRefError, span::Span},
     lexer::token::{PuncuationKind, TokenKind},
     parser::Parser,
 };
 use anyhow::Result;
 use core::fmt;
 
+#[derive(Debug, Clone)]
 pub struct Param {
     pub name: String,
     pub type_ref: TypeRef,
@@ -46,7 +47,12 @@ impl Param {
             span = Span::merge(
                 span,
                 match type_ref.clone() {
-                    TypeRef::Name { name: _name, span } => span,
+                    TypeRef::Named { name: _name, span } => span,
+                    _ => {
+                        return Err(
+                            TypeRefError::InvalidTypeReference { type_ref: type_ref }.into()
+                        );
+                    }
                 },
             );
             if parser.peek()?.kind != TokenKind::Punctuation(PuncuationKind::RightParen) {

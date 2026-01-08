@@ -1,6 +1,12 @@
-use crate::{ast::types::TypeRef, errors::span::Span, lexer::token::OperatorKind, parser::Parser};
+use crate::{
+    ast::types::TypeRef,
+    errors::{TypeRefError, span::Span},
+    lexer::token::OperatorKind,
+    parser::Parser,
+};
 use anyhow::Result;
 
+#[derive(Debug, Clone)]
 pub struct FnReturn {
     pub type_ref: TypeRef,
     pub span: Span,
@@ -22,7 +28,10 @@ impl FnReturn {
         ))?;
         let type_ref = TypeRef::parse_type_ref(parser)?;
         let span = match type_ref.clone() {
-            TypeRef::Name { name: _name, span } => span,
+            TypeRef::Named { name: _name, span } => span,
+            _ => {
+                return Err(TypeRefError::InvalidTypeReference { type_ref: type_ref }.into());
+            }
         };
 
         Ok(FnReturn { type_ref, span })

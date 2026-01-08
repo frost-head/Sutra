@@ -7,6 +7,7 @@ pub mod return_statement;
 pub mod statement;
 pub mod types;
 
+#[derive(Debug, Clone)]
 pub struct Ast {
     pub items: Vec<Item>,
 }
