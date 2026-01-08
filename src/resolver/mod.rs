@@ -1,10 +1,14 @@
 use std::collections::HashMap;
 
-use anyhow::{Context, Result};
+use anyhow::Result;
 
-use crate::resolver::{
-    scope::{Scope, ScopeId},
-    symbol::{Symbol, SymbolId},
+use crate::{
+    ast::item::function::FuncItem,
+    resolver::{
+        scope::{Scope, ScopeId},
+        symbol::{Symbol, SymbolId, SymbolKind},
+        types::{TypeId, TypeKind, TypeTable},
+    },
 };
 
 pub mod scope;
@@ -15,18 +19,24 @@ pub struct Resolver {
     pub scopes: Vec<Scope>,
     pub symbols: Vec<Symbol>,
     pub cur_scope: ScopeId,
+    pub type_table: TypeTable,
 }
 
 impl Resolver {
-    pub fn new() -> Self {
+    pub fn new(type_table: TypeTable) -> Self {
         let mut scopes = Vec::new();
-        let mut symbols = Vec::new();
+        scopes.push(Scope {
+            symbols: HashMap::new(),
+            parent: None,
+        });
+        let symbols = Vec::new();
         let cur_scope = ScopeId(0);
 
         Resolver {
             scopes,
             symbols,
             cur_scope,
+            type_table,
         }
     }
 
@@ -40,21 +50,25 @@ impl Resolver {
         id
     }
 
-    pub fn exit_scope(&mut self) -> Result<()> {
-        let parent = self.scopes[self.cur_scope.0].parent;
-        self.cur_scope = parent.context("Failed to exit scope")?;
-        Ok(())
+    pub fn exit_scope(&mut self) {
+        if let Some(parent) = self.scopes[self.cur_scope.0].parent {
+            self.cur_scope = parent;
+        }
     }
 
     pub fn declare_symbol(&mut self, symbol: Symbol) {
         let symbol_id = self.symbols.len();
-        self.symbols.push(symbol.clone());
+        let scope = &mut self.scopes[self.cur_scope.0];
 
-        self.scopes[self.cur_scope.0]
+        if scope.symbols.contains_key(&symbol.name) {
+            panic!("symbol redeclared in same scope");
+        }
+
+        scope
             .symbols
-            .insert(symbol.name, SymbolId(symbol_id));
+            .insert(symbol.name.clone(), SymbolId(symbol_id));
     }
-    
+
     pub fn resolve_symbol(&self, name: &str) -> Option<SymbolId> {
         let mut current_scope = self.cur_scope;
 
@@ -66,5 +80,37 @@ impl Resolver {
         }
 
         None
+    }
+
+    pub fn declare_function(&mut self, func_item: FuncItem) -> Result<()> {
+        let mut return_id = None;
+        let mut param_ids: Option<Vec<TypeId>> = None;
+        if let Some(return_type) = func_item.return_type.clone() {
+            return_id = Some(self.type_table.type_ref_to_type(return_type.type_ref)?);
+        }
+        if let Some(param_types) = func_item.params.clone() {
+            param_ids = Some(
+                param_types
+                    .into_iter()
+                    .map(|param_type| -> Result<TypeId> {
+                        Ok(self.type_table.type_ref_to_type(param_type.type_ref)?)
+                    })
+                    .collect::<Result<Vec<TypeId>>>()?,
+            );
+        }
+        let func_type = TypeKind::Function {
+            params: param_ids,
+            ret: return_id,
+        };
+        let func_id = self.type_table.intern(func_type);
+        let func_sym = Symbol {
+            name: func_item.name.clone(),
+            kind: SymbolKind::Function,
+            type_id: func_id,
+            scope_id: self.cur_scope.clone(),
+            mutable: false,
+        };
+        self.declare_symbol(func_sym);
+        Ok(())
     }
 }
