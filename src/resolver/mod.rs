@@ -4,10 +4,11 @@ use anyhow::Result;
 
 use crate::{
     ast::item::function::FuncItem,
+    errors::ResolverError,
     resolver::{
         scope::{Scope, ScopeId},
         symbol::{Symbol, SymbolId, SymbolKind},
-        types::{TypeId, TypeKind, TypeTable},
+        types::{Type, TypeId, TypeKind, TypeTable},
     },
 };
 
@@ -15,6 +16,7 @@ pub mod scope;
 pub mod symbol;
 pub mod types;
 
+#[derive(Debug)]
 pub struct Resolver {
     pub scopes: Vec<Scope>,
     pub symbols: Vec<Symbol>,
@@ -56,17 +58,22 @@ impl Resolver {
         }
     }
 
-    pub fn declare_symbol(&mut self, symbol: Symbol) {
+    pub fn declare_symbol(&mut self, symbol: Symbol) -> Result<()> {
         let symbol_id = self.symbols.len();
         let scope = &mut self.scopes[self.cur_scope.0];
 
+        self.symbols.push(symbol.clone());
         if scope.symbols.contains_key(&symbol.name) {
-            panic!("symbol redeclared in same scope");
+            return Err(ResolverError::SymbolAlreadyDeclared {
+                symbol: symbol.name.clone(),
+            }
+            .into());
         }
 
         scope
             .symbols
             .insert(symbol.name.clone(), SymbolId(symbol_id));
+        Ok(())
     }
 
     pub fn resolve_symbol(&self, name: &str) -> Option<SymbolId> {
@@ -86,14 +93,16 @@ impl Resolver {
         let mut return_id = None;
         let mut param_ids: Option<Vec<TypeId>> = None;
         if let Some(return_type) = func_item.return_type.clone() {
-            return_id = Some(self.type_table.type_ref_to_type(return_type.type_ref)?);
+            let return_kind = Type::type_ref_to_type(return_type.type_ref)?;
+            return_id = Some(self.type_table.intern(return_kind));
         }
         if let Some(param_types) = func_item.params.clone() {
             param_ids = Some(
                 param_types
                     .into_iter()
                     .map(|param_type| -> Result<TypeId> {
-                        Ok(self.type_table.type_ref_to_type(param_type.type_ref)?)
+                        let param_kind = Type::type_ref_to_type(param_type.type_ref)?;
+                        Ok(self.type_table.intern(param_kind))
                     })
                     .collect::<Result<Vec<TypeId>>>()?,
             );
@@ -110,7 +119,7 @@ impl Resolver {
             scope_id: self.cur_scope.clone(),
             mutable: false,
         };
-        self.declare_symbol(func_sym);
+        self.declare_symbol(func_sym)?;
         Ok(())
     }
 }

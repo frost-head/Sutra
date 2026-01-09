@@ -32,7 +32,7 @@ fn main() -> Result<()> {
 
     write_file(output_buffer);
 
-    let mut type_table = TypeTable::new();
+    let type_table = TypeTable::new();
     let mut resolver = Resolver::new(type_table);
 
     let ast = parser.ast.clone();
@@ -42,6 +42,7 @@ fn main() -> Result<()> {
             Item::Function(func_item) => {
                 resolver.declare_function(func_item.clone())?;
                 println!("{:?}", resolver.resolve_symbol("main"));
+                println!("{:?}", resolver.resolve_symbol("add"));
             }
 
             _ => {

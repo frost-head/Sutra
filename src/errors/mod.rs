@@ -27,10 +27,17 @@ pub enum ParserError {
     ExpectedTokenGotUnexpected { kind: TokenKind, got: Token },
 }
 
-pub enum ResolverError {}
-
 #[derive(Error, Debug)]
 pub enum TypeRefError {
     #[error("Invalid type reference, \nError: {:?}", type_ref.print_span())]
     InvalidTypeReference { type_ref: TypeRef },
+}
+
+#[derive(Error, Debug)]
+pub enum ResolverError {
+    #[error("Symbol not found: {}", symbol)]
+    SymbolNotFound { symbol: String },
+
+    #[error("Symbol already declared: {}", symbol)]
+    SymbolAlreadyDeclared { symbol: String },
 }

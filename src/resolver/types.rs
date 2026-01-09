@@ -25,6 +25,26 @@ pub struct Type {
     pub kind: TypeKind,
 }
 
+impl Type {
+    pub fn type_ref_to_type(ty: TypeRef) -> Result<TypeKind> {
+        match ty {
+            TypeRef::Named {
+                ref name,
+                span: _span,
+            } => match name.clone().as_str() {
+                "int" => Ok(TypeKind::Int),
+                "bool" => Ok(TypeKind::Bool),
+                _ => Err(TypeRefError::InvalidTypeReference {
+                    type_ref: ty.clone(),
+                }
+                .into()),
+            },
+
+            _ => Err(TypeRefError::InvalidTypeReference { type_ref: ty }.into()),
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct TypeTable {
     pub types: Vec<Type>,
@@ -40,19 +60,5 @@ impl TypeTable {
         let id = TypeId(self.types.len());
         self.types.push(Type { kind });
         id
-    }
-
-    pub fn type_ref_to_type(&mut self, ty: TypeRef) -> Result<TypeId> {
-        match ty {
-            TypeRef::Named {
-                name: _name,
-                span: _span,
-            } => {
-                let type_id = self.intern(TypeKind::Int);
-                Ok(type_id)
-            }
-
-            _ => Err(TypeRefError::InvalidTypeReference { type_ref: ty }.into()),
-        }
     }
 }
