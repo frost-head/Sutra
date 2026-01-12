@@ -49,7 +49,7 @@ impl<'a> Parser<'a> {
             .peek()
             .context("could not peek at the next token")?);
     }
-
+    
     pub fn consume(&mut self) -> Result<Token> {
         return self
             .tokens

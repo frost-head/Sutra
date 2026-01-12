@@ -1,11 +1,10 @@
 use anyhow::Result;
 use clap::Parser as clap_parser;
 use std::fs;
-use sutra::ast::item::function::FuncItem;
 use sutra::parser::Parser;
 use sutra::resolver::Resolver;
-use sutra::resolver::symbol::{Symbol, SymbolKind};
-use sutra::resolver::types::{TypeId, TypeKind, TypeTable};
+use sutra::resolver::types::TypeTable;
+
 use sutra::{ast::item::Item, lexer::Lexer};
 
 fn main() -> Result<()> {
@@ -51,6 +50,7 @@ fn main() -> Result<()> {
             }
         }
     }
+    println!("resolver : {}", resolver);
 
     Ok(())
 }

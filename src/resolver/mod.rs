@@ -23,6 +23,15 @@ pub struct Resolver {
     pub cur_scope: ScopeId,
     pub type_table: TypeTable,
 }
+impl std::fmt::Display for Resolver {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Resolver {{\n")?;
+        write!(f, "  scopes: {:?},\n", self.scopes)?;
+        write!(f, "  symbols: {:?},\n", self.symbols)?;
+        write!(f, "  cur_scope: {:?},\n", self.cur_scope)?;
+        write!(f, "  type_table: {:?}\n}}", self.type_table)
+    }
+}
 
 impl Resolver {
     pub fn new(type_table: TypeTable) -> Self {

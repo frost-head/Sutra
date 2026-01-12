@@ -1,3 +1,6 @@
+use core::fmt;
+use std::fmt::Formatter;
+
 use crate::{ast::types::TypeRef, errors::TypeRefError};
 use anyhow::Result;
 
@@ -25,6 +28,68 @@ pub struct Type {
     pub kind: TypeKind,
 }
 
+impl fmt::Display for Type {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self.kind.clone() {
+            TypeKind::Int => write!(f, "int"),
+            TypeKind::Bool => write!(f, "bool"),
+            TypeKind::Pointer(ty) => write!(f, "*{:?}", ty),
+            TypeKind::Function { params, ret } => {
+                if let Some(params) = params {
+                    write!(f, "(")?;
+                    for (i, param) in params.iter().enumerate() {
+                        if i > 0 {
+                            write!(f, ", ")?;
+                        }
+                        write!(f, "{:?}", param)?;
+                    }
+                    write!(f, ") ->")?;
+                } else {
+                    write!(f, "() ->")?;
+                }
+                if let Some(ret) = ret {
+                    write!(f, " {:?}", ret)?;
+                    Ok(())
+                } else {
+                    write!(f, " void")?;
+                    Ok(())
+                }
+            }
+            TypeKind::Struct { name, fields } => {
+                write!(f, "{} {{", name)?;
+                for (i, field) in fields.iter().enumerate() {
+                    if i > 0 {
+                        write!(f, ", ")?;
+                    }
+                    write!(f, "{:?}: {:?}", field.0, field.1)?;
+                }
+                write!(f, "}}")?;
+                Ok(())
+            }
+            TypeKind::Alias(ty) => write!(f, "{:?}", ty),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct TypeTable {
+    pub types: Vec<Type>,
+}
+
+impl fmt::Display for TypeTable {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{{")?;
+        for (i, ty) in self.types.iter().enumerate() {
+            if i > 0 {
+                write!(f, ", ")?;
+            }
+            write!(f, "{}", ty)?;
+        }
+        write!(f, "}}")?;
+        Ok(())
+    }
+}
+
 impl Type {
     pub fn type_ref_to_type(ty: TypeRef) -> Result<TypeKind> {
         match ty {
@@ -43,11 +108,6 @@ impl Type {
             _ => Err(TypeRefError::InvalidTypeReference { type_ref: ty }.into()),
         }
     }
-}
-
-#[derive(Debug, Clone)]
-pub struct TypeTable {
-    pub types: Vec<Type>,
 }
 
 impl TypeTable {
