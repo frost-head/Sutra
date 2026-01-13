@@ -3,7 +3,10 @@ use std::collections::HashMap;
 use anyhow::Result;
 
 use crate::{
-    ast::item::function::FuncItem,
+    ast::{
+        Ast,
+        item::{Item, function::FuncItem},
+    },
     errors::ResolverError,
     resolver::{
         scope::{Scope, ScopeId},
@@ -49,6 +52,35 @@ impl Resolver {
             cur_scope,
             type_table,
         }
+    }
+
+    pub fn resolve_global(&mut self, ast: Ast) -> Result<(), anyhow::Error> {
+        for item in &ast.items {
+            match item {
+                Item::Function(func_item) => {
+                    self.declare_function(func_item.clone())?;
+                }
+
+                _ => {
+                    eprintln!("Error occurred while parsing the input");
+                    std::process::exit(1);
+                }
+            }
+        }
+        for item in &ast.items {
+            match item {
+                Item::Function(func_item) => {
+                    self.resolve_function(func_item.clone())?;
+                }
+
+                _ => {
+                    eprintln!("Error occurred while parsing the input");
+                    std::process::exit(1);
+                }
+            }
+        }
+
+        Ok(())
     }
 
     pub fn enter_scope(&mut self, parent: Option<ScopeId>) -> ScopeId {
@@ -130,5 +162,42 @@ impl Resolver {
         };
         self.declare_symbol(func_sym)?;
         Ok(())
+    }
+
+    fn resolve_function(&mut self, fn_item: FuncItem) -> Result<()> {
+        let scope_id = self.enter_scope(Some(self.cur_scope));
+
+        self.declare_params(fn_item.clone(), scope_id)?;
+        
+        
+        // TODO : resolve block
+
+        self.exit_scope();
+        Ok(())
+    }
+
+    fn declare_params(
+        &mut self,
+        fn_item: FuncItem,
+        scope_id: ScopeId,
+    ) -> Result<(), anyhow::Error> {
+        Ok(if let Some(param_types) = fn_item.params.clone() {
+            let _ = Some(
+                param_types
+                    .into_iter()
+                    .map(|param_type| -> Result<()> {
+                        let param_kind = Type::type_ref_to_type(param_type.type_ref)?;
+                        let type_id = self.type_table.intern(param_kind);
+                        self.declare_symbol(Symbol {
+                            name: param_type.name,
+                            kind: SymbolKind::Variable,
+                            type_id,
+                            scope_id,
+                            mutable: false,
+                        })
+                    })
+                    .collect::<Result<Vec<()>>>()?,
+            );
+        })
     }
 }

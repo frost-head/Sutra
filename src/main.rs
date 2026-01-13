@@ -36,20 +36,7 @@ fn main() -> Result<()> {
 
     let ast = parser.ast.clone();
 
-    for item in &ast.items {
-        match item {
-            Item::Function(func_item) => {
-                resolver.declare_function(func_item.clone())?;
-                println!("{:?}", resolver.resolve_symbol("main"));
-                println!("{:?}", resolver.resolve_symbol("add"));
-            }
-
-            _ => {
-                eprintln!("Error occurred while parsing the input");
-                std::process::exit(1);
-            }
-        }
-    }
+    resolver.resolve_global(ast)?;
     println!("resolver : {}", resolver);
 
     Ok(())
