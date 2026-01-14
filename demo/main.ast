@@ -12,7 +12,11 @@ function main()
 }
 function add(a: int, b: int) -> int 
 {
+    Return Statement:
+        Value: (a + b) 
 }
 function true_or_false(c: bool) -> bool 
 {
+    Return Statement:
+        Value: c 
 }

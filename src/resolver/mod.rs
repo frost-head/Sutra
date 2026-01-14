@@ -196,7 +196,7 @@ impl Resolver {
 
                     self.declare_symbol(sym)?;
                 }
-                _ => Err(ResolverError::CouldNotResolve)?,
+                _ => {}
             }
         }
 
