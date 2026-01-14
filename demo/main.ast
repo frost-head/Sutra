@@ -9,8 +9,6 @@ function main()
     Let Statement:
       Identifier: z
       Value: true 
-    Return Statement:
-        Value: x 
 }
 function add(a: int, b: int) -> int 
 {

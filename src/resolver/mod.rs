@@ -14,6 +14,7 @@ use crate::{
         symbol::{Symbol, SymbolId, SymbolKind},
         types::{Type, TypeId, TypeKind, TypeTable},
     },
+    utils::indent_multiline,
 };
 
 pub mod scope;
@@ -29,11 +30,14 @@ pub struct Resolver {
 }
 impl std::fmt::Display for Resolver {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Resolver {{\n")?;
-        write!(f, "  scopes: {:?},\n", self.scopes)?;
-        write!(f, "  symbols: {:?},\n", self.symbols)?;
-        write!(f, "  cur_scope: {:?},\n", self.cur_scope)?;
-        write!(f, "  type_table: {}\n}}", self.type_table)
+        write!(f, "Resolver {{\n\n")?;
+        write!(f, "  scopes: {:?},\n\n", self.scopes)?;
+        write!(f, "  symbols:\n")?;
+        for sym in self.symbols.iter() {
+            write!(f, "{}\n\n", indent_multiline(&sym.to_string(), "    "))?;
+        }
+        write!(f, "  cur_scope: {:?},\n\n", self.cur_scope)?;
+        write!(f, "  type_table: {}\n\n}}", self.type_table)
     }
 }
 

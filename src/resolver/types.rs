@@ -1,7 +1,7 @@
 use core::fmt;
 use std::fmt::Formatter;
 
-use crate::{ast::types::TypeRef, errors::TypeRefError};
+use crate::{ast::types::TypeRef, errors::TypeRefError, utils::indent_multiline};
 use anyhow::Result;
 
 #[derive(Debug, Clone)]
@@ -84,7 +84,13 @@ impl fmt::Display for TypeTable {
             if i > 0 {
                 write!(f, ", ")?;
             }
-            write!(f, "\nType : {}, Id : {}", ty, i)?;
+            write!(
+                f,
+                "\n{} : {}, Id : {}",
+                indent_multiline(&"Type".to_string(), "    "),
+                ty,
+                i
+            )?;
         }
         write!(f, "}}")?;
         Ok(())

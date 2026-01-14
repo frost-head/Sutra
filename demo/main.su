@@ -2,7 +2,6 @@ func main() {
     let x : int = (5 * 8) + 3;
     let y : int = 5;
     let z : bool = true;
-    return x;
 }
 
 func add(a: int, b: int) -> int {}
