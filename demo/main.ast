@@ -5,23 +5,16 @@ function main()
       Value: ((5 * 8) + 3) 
     Let Statement:
       Identifier: y
-      Value: if : (x < y) then {
-        Let Statement:
-          Identifier: y
-          Value: (- 2) 
-    } 
-    if : (x < y) then {
-        ident x binds 2 
-    } else : {
-        Let Statement:
-          Identifier: x
-          Value: 3 
-    } 
+      Value: 5 
+    Let Statement:
+      Identifier: z
+      Value: true 
     Return Statement:
-        Value: c 
+        Value: x 
 }
-function add(a: int, b: int, c: bool) -> int 
+function add(a: int, b: int) -> int 
 {
-    Return Statement:
-        Value: (a + b) 
+}
+function true_or_false(c: bool) -> bool 
+{
 }

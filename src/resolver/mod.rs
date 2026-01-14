@@ -5,6 +5,7 @@ use anyhow::Result;
 use crate::{
     ast::{
         Ast,
+        block::Block,
         item::{Item, function::FuncItem},
     },
     errors::ResolverError,
@@ -32,7 +33,7 @@ impl std::fmt::Display for Resolver {
         write!(f, "  scopes: {:?},\n", self.scopes)?;
         write!(f, "  symbols: {:?},\n", self.symbols)?;
         write!(f, "  cur_scope: {:?},\n", self.cur_scope)?;
-        write!(f, "  type_table: {:?}\n}}", self.type_table)
+        write!(f, "  type_table: {}\n}}", self.type_table)
     }
 }
 
@@ -168,11 +169,33 @@ impl Resolver {
         let scope_id = self.enter_scope(Some(self.cur_scope));
 
         self.declare_params(fn_item.clone(), scope_id)?;
-        
-        
-        // TODO : resolve block
+
+        self.resolve_block(fn_item.body)?;
 
         self.exit_scope();
+        Ok(())
+    }
+
+    fn resolve_block(&mut self, block: Block) -> Result<()> {
+        for item in block.statements {
+            match item {
+                crate::ast::statement::Stmt::LetStmt(let_statement) => {
+                    let ty = Type::type_ref_to_type(let_statement.clone().type_ref)?;
+                    let id = self.type_table.intern(ty);
+                    let sym = Symbol {
+                        name: let_statement.identifier,
+                        kind: SymbolKind::Variable,
+                        type_id: id,
+                        scope_id: self.cur_scope,
+                        mutable: false,
+                    };
+
+                    self.declare_symbol(sym)?;
+                }
+                _ => Err(ResolverError::CouldNotResolve)?,
+            }
+        }
+
         Ok(())
     }
 

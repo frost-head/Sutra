@@ -35,6 +35,7 @@ impl fmt::Display for Type {
             TypeKind::Bool => write!(f, "bool"),
             TypeKind::Pointer(ty) => write!(f, "*{:?}", ty),
             TypeKind::Function { params, ret } => {
+                write!(f, "Function ")?;
                 if let Some(params) = params {
                     write!(f, "(")?;
                     for (i, param) in params.iter().enumerate() {
@@ -51,7 +52,7 @@ impl fmt::Display for Type {
                     write!(f, " {:?}", ret)?;
                     Ok(())
                 } else {
-                    write!(f, " void")?;
+                    write!(f, " None")?;
                     Ok(())
                 }
             }
@@ -83,7 +84,7 @@ impl fmt::Display for TypeTable {
             if i > 0 {
                 write!(f, ", ")?;
             }
-            write!(f, "{}", ty)?;
+            write!(f, "\nType : {}, Id : {}", ty, i)?;
         }
         write!(f, "}}")?;
         Ok(())

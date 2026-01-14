@@ -1,3 +1,4 @@
+use crate::ast::types::TypeRef;
 use crate::errors::ParserError;
 use crate::errors::span::Span;
 use crate::lexer::token::{KeywordKind, OperatorKind, PuncuationKind, TokenKind};
@@ -10,14 +11,21 @@ pub struct LetStatement {
     pub(crate) identifier: String,
     pub(crate) value: Expression,
     pub(crate) span: Span,
+    pub type_ref: TypeRef,
 }
 
 impl LetStatement {
-    pub fn new(identifier: String, value: Expression, span: Span) -> LetStatement {
+    pub fn new(
+        identifier: String,
+        value: Expression,
+        span: Span,
+        type_ref: TypeRef,
+    ) -> LetStatement {
         LetStatement {
             identifier,
             value,
             span,
+            type_ref,
         }
     }
 
@@ -36,6 +44,10 @@ impl LetStatement {
             .into());
         }
 
+        parser.expect(TokenKind::Punctuation(PuncuationKind::Colon))?;
+
+        let type_ref = TypeRef::parse_type_ref(parser)?;
+
         parser.expect(TokenKind::Operator(OperatorKind::Equal))?;
         expression = Expression::parse(parser)?;
 
@@ -45,6 +57,7 @@ impl LetStatement {
             identifier,
             expression,
             Span::merge(first_tok.span, semicolon_tok.span),
+            type_ref,
         );
         Ok(statement)
     }

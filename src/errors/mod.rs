@@ -40,4 +40,7 @@ pub enum ResolverError {
 
     #[error("Symbol already declared: {}", symbol)]
     SymbolAlreadyDeclared { symbol: String },
+
+    #[error("Could not resolve")]
+    CouldNotResolve,
 }

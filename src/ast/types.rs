@@ -6,7 +6,7 @@ use crate::{
 use anyhow::Result;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum TypeRef {
     Named {
         name: String,
