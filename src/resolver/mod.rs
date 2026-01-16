@@ -12,7 +12,6 @@ use crate::{
     resolver::{
         scope::{Scope, ScopeId},
         symbol::{Symbol, SymbolId, SymbolKind},
-        types::{Type, TypeId, TypeKind, TypeTable},
     },
     utils::indent_multiline,
 };
@@ -26,7 +25,6 @@ pub struct Resolver {
     pub scopes: Vec<Scope>,
     pub symbols: Vec<Symbol>,
     pub cur_scope: ScopeId,
-    pub type_table: TypeTable,
 }
 impl std::fmt::Display for Resolver {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -36,13 +34,12 @@ impl std::fmt::Display for Resolver {
         for sym in self.symbols.iter() {
             write!(f, "{}\n\n", indent_multiline(&sym.to_string(), "    "))?;
         }
-        write!(f, "  cur_scope: {:?},\n\n", self.cur_scope)?;
-        write!(f, "  type_table: {}\n\n}}", self.type_table)
+        write!(f, "  cur_scope: {:?},\n\n", self.cur_scope)
     }
 }
 
 impl Resolver {
-    pub fn new(type_table: TypeTable) -> Self {
+    pub fn new() -> Self {
         let mut scopes = Vec::new();
         scopes.push(Scope {
             symbols: HashMap::new(),
@@ -55,7 +52,6 @@ impl Resolver {
             scopes,
             symbols,
             cur_scope,
-            type_table,
         }
     }
 
@@ -136,32 +132,9 @@ impl Resolver {
     }
 
     pub fn declare_function(&mut self, func_item: FuncItem) -> Result<()> {
-        let mut return_id = None;
-        let mut param_ids: Option<Vec<TypeId>> = None;
-        if let Some(return_type) = func_item.return_type.clone() {
-            let return_kind = Type::type_ref_to_type(return_type.type_ref)?;
-            return_id = Some(self.type_table.intern(return_kind));
-        }
-        if let Some(param_types) = func_item.params.clone() {
-            param_ids = Some(
-                param_types
-                    .into_iter()
-                    .map(|param_type| -> Result<TypeId> {
-                        let param_kind = Type::type_ref_to_type(param_type.type_ref)?;
-                        Ok(self.type_table.intern(param_kind))
-                    })
-                    .collect::<Result<Vec<TypeId>>>()?,
-            );
-        }
-        let func_type = TypeKind::Function {
-            params: param_ids,
-            ret: return_id,
-        };
-        let func_id = self.type_table.intern(func_type);
         let func_sym = Symbol {
             name: func_item.name.clone(),
             kind: SymbolKind::Function,
-            type_id: func_id,
             scope_id: self.cur_scope.clone(),
             mutable: false,
         };
@@ -184,12 +157,9 @@ impl Resolver {
         for item in block.statements {
             match item {
                 crate::ast::statement::Stmt::LetStmt(let_statement) => {
-                    let ty = Type::type_ref_to_type(let_statement.clone().type_ref)?;
-                    let id = self.type_table.intern(ty);
                     let sym = Symbol {
                         name: let_statement.identifier,
                         kind: SymbolKind::Variable,
-                        type_id: id,
                         scope_id: self.cur_scope,
                         mutable: false,
                     };
@@ -213,12 +183,9 @@ impl Resolver {
                 param_types
                     .into_iter()
                     .map(|param_type| -> Result<()> {
-                        let param_kind = Type::type_ref_to_type(param_type.type_ref)?;
-                        let type_id = self.type_table.intern(param_kind);
                         self.declare_symbol(Symbol {
                             name: param_type.name,
                             kind: SymbolKind::Variable,
-                            type_id,
                             scope_id,
                             mutable: false,
                         })

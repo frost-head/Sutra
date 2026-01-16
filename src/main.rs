@@ -3,7 +3,6 @@ use clap::Parser as clap_parser;
 use std::fs;
 use sutra::parser::Parser;
 use sutra::resolver::Resolver;
-use sutra::resolver::types::TypeTable;
 
 use sutra::{ast::item::Item, lexer::Lexer};
 
@@ -31,8 +30,7 @@ fn main() -> Result<()> {
 
     write_file(output_buffer);
 
-    let type_table = TypeTable::new();
-    let mut resolver = Resolver::new(type_table);
+    let mut resolver = Resolver::new();
 
     let ast = parser.ast.clone();
 

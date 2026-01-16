@@ -3,4 +3,5 @@ pub mod errors;
 pub mod lexer;
 pub mod parser;
 pub mod resolver;
+pub mod type_checker;
 pub mod utils;
