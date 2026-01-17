@@ -28,7 +28,7 @@ fn main() -> Result<()> {
         }
     }
 
-    write_file(output_buffer);
+    write_to_file(output_buffer, "demo/IR/main.parser_ast".to_string());
 
     let mut resolver = Resolver::new();
 
@@ -43,9 +43,9 @@ fn main() -> Result<()> {
 #[derive(clap_parser)]
 struct Args {
     /// Input file to read
-    #[clap(short, long)]
+    #[clap(short, long, default_value = "demo/main.su")]
     input_file: String,
-    #[clap(short, long)]
+    #[clap(short, long, default_value = "demo/main.ir")]
     output_file: String,
 }
 
@@ -55,7 +55,6 @@ fn read_file() -> String {
     content
 }
 
-fn write_file(output_buffer: String) {
-    let args = Args::parse();
-    fs::write(args.output_file, &output_buffer).expect("failed to write file");
+fn write_to_file(output_buffer: String, file_name: String) {
+    fs::write(file_name, &output_buffer).expect("failed to write file");
 }
