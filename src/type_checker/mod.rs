@@ -1,7 +1,7 @@
 use core::fmt;
 use std::fmt::Formatter;
 
-use crate::{ast::types::TypeRef, errors::TypeRefError, utils::indent_multiline};
+use crate::{parser::ast::types::TypeRef, errors::TypeRefError, utils::indent_multiline};
 use anyhow::Result;
 
 #[derive(Debug, Clone)]

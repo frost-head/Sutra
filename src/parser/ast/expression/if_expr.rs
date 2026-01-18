@@ -1,5 +1,5 @@
 use crate::{
-    ast::{
+    parser::ast::{
         block::Block,
         expression::{Expression, ExpressionKind},
     },

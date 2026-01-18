@@ -1,8 +1,8 @@
 use crate::{
-    ast::types::TypeRef,
     errors::{TypeRefError, span::Span},
     lexer::token::OperatorKind,
     parser::Parser,
+    parser::ast::types::TypeRef,
 };
 use anyhow::Result;
 

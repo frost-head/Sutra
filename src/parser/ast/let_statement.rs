@@ -1,8 +1,9 @@
-use crate::ast::types::TypeRef;
 use crate::errors::ParserError;
 use crate::errors::span::Span;
 use crate::lexer::token::{KeywordKind, OperatorKind, PuncuationKind, TokenKind};
-use crate::{ast::expression::Expression, parser::Parser};
+use crate::parser::Parser;
+use crate::parser::ast::expression::Expression;
+use crate::parser::ast::types::TypeRef;
 use anyhow::Result;
 use std::fmt::{self, Display};
 

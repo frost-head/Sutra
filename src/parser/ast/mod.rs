@@ -1,4 +1,4 @@
-use crate::ast::item::Item;
+use crate::parser::ast::item::Item;
 pub mod block;
 pub mod expression;
 pub mod item;

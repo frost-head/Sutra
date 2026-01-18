@@ -1,5 +1,5 @@
 use crate::{
-    ast::types::TypeRef,
+    parser::ast::types::TypeRef,
     errors::{ParserError, TypeRefError, span::Span},
     lexer::token::{PuncuationKind, TokenKind},
     parser::Parser,

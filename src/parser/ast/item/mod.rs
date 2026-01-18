@@ -1,4 +1,4 @@
-use crate::ast::item::function::FuncItem;
+use crate::parser::ast::item::function::FuncItem;
 
 pub mod function;
 

@@ -4,7 +4,7 @@ use std::fs;
 use sutra::parser::Parser;
 use sutra::resolver::Resolver;
 
-use sutra::{ast::item::Item, lexer::Lexer};
+use sutra::{lexer::Lexer, parser::ast::item::Item};
 
 fn main() -> Result<()> {
     let content = read_file();

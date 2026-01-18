@@ -3,12 +3,12 @@ use std::collections::HashMap;
 use anyhow::Result;
 
 use crate::{
-    ast::{
+    errors::ResolverError,
+    parser::ast::{
         Ast,
         block::Block,
-        item::{Item, function::FuncItem},
+        item::{Item, function::FuncItem}, statement::Stmt,
     },
-    errors::ResolverError,
     resolver::{
         scope::{Scope, ScopeId},
         symbol::{Symbol, SymbolId, SymbolKind},
@@ -156,7 +156,7 @@ impl Resolver {
     fn resolve_block(&mut self, block: Block) -> Result<()> {
         for item in block.statements {
             match item {
-                crate::ast::statement::Stmt::LetStmt(let_statement) => {
+                Stmt::LetStmt(let_statement) => {
                     let sym = Symbol {
                         name: let_statement.identifier,
                         kind: SymbolKind::Variable,

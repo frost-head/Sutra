@@ -1,5 +1,5 @@
 use crate::{
-    ast::types::TypeRef,
+    parser::ast::types::TypeRef,
     lexer::token::{Token, TokenKind},
 };
 use thiserror::Error;

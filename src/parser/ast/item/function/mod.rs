@@ -2,13 +2,13 @@ use anyhow::{Context, Result};
 use core::fmt;
 
 use crate::{
-    ast::{
-        block::Block,
-        item::function::{fn_params::Param, fn_return::FnReturn},
-    },
     errors::ParserError,
     lexer::token::{KeywordKind, OperatorKind, PuncuationKind, TokenKind},
     parser::Parser,
+    parser::ast::{
+        block::Block,
+        item::function::{fn_params::Param, fn_return::FnReturn},
+    },
 };
 
 pub mod fn_params;
