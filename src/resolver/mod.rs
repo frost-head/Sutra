@@ -2,13 +2,14 @@ use std::collections::HashMap;
 
 use anyhow::Result;
 
+use crate::parser::ast::{
+    Ast,
+    block::Block,
+    item::{Item, function::FuncItem},
+    statement::Stmt,
+};
 use crate::{
     errors::ResolverError,
-    parser::ast::{
-        Ast,
-        block::Block,
-        item::{Item, function::FuncItem}, statement::Stmt,
-    },
     resolver::{
         scope::{Scope, ScopeId},
         symbol::{Symbol, SymbolId, SymbolKind},
@@ -16,9 +17,9 @@ use crate::{
     utils::indent_multiline,
 };
 
+pub mod ast;
 pub mod scope;
 pub mod symbol;
-pub mod types;
 
 #[derive(Debug)]
 pub struct Resolver {
