@@ -1,9 +1,4 @@
-use crate::{
-    errors::{TypeRefError, span::Span},
-    lexer::token::OperatorKind,
-    resolver::ast::types::TypeRef,
-};
-use anyhow::Result;
+use crate::{errors::span::Span, resolver::ast::types::TypeRef};
 
 #[derive(Debug, Clone)]
 pub struct FnReturn {
@@ -16,4 +11,3 @@ impl std::fmt::Display for FnReturn {
         write!(f, "{}", self.type_ref)
     }
 }
-

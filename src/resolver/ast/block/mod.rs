@@ -1,17 +1,5 @@
-use anyhow::Result;
 use core::fmt;
-
-use crate::{
-    errors::span::Span,
-    lexer::token::{KeywordKind, OperatorKind, PuncuationKind, TokenKind},
-    resolver::ast::{
-        expression::{Expression, ExpressionKind, assign::Identifier},
-        let_statement::LetStatement,
-        return_statement::ReturnStatement,
-        statement::Stmt,
-    },
-    utils::indent_multiline,
-};
+use crate::{errors::span::Span, resolver::ast::statement::Stmt, utils::indent_multiline};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Block {
@@ -20,9 +8,6 @@ pub struct Block {
 }
 
 impl Block {
-    fn new(statements: Vec<Stmt>, span: Span) -> Self {
-        Block { statements, span }
-    }
 }
 
 impl fmt::Display for Block {

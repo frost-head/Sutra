@@ -22,8 +22,21 @@ impl std::fmt::Display for Symbol {
 pub enum SymbolKind {
     Function,
     Variable,
-    Type,
+    PremitiveType(PremitiveTypes),
 }
 
 #[derive(Debug, Clone)]
+pub enum PremitiveTypes {
+    Int,
+    Float,
+    Bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SymbolId(pub usize);
+
+impl std::fmt::Display for SymbolId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "SymbolId({})", self.0)
+    }
+}

@@ -46,8 +46,27 @@ impl Resolver {
             symbols: HashMap::new(),
             parent: None,
         });
-        let symbols = Vec::new();
+        let mut symbols = Vec::new();
         let cur_scope = ScopeId(0);
+
+        symbols.push(Symbol {
+            name: "int".to_string(),
+            kind: SymbolKind::PremitiveType(symbol::PremitiveTypes::Int),
+            scope_id: cur_scope,
+            mutable: false,
+        });
+        symbols.push(Symbol {
+            name: "float".to_string(),
+            kind: SymbolKind::PremitiveType(symbol::PremitiveTypes::Float),
+            scope_id: cur_scope,
+            mutable: false,
+        });
+        symbols.push(Symbol {
+            name: "bool".to_string(),
+            kind: SymbolKind::PremitiveType(symbol::PremitiveTypes::Bool),
+            scope_id: cur_scope,
+            mutable: false,
+        });
 
         Resolver {
             scopes,

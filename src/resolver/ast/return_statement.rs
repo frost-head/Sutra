@@ -1,7 +1,5 @@
 use crate::errors::span::Span;
-use crate::lexer::token::{KeywordKind, PuncuationKind, TokenKind};
 use crate::resolver::ast::expression::Expression;
-use anyhow::Result;
 use core::fmt;
 use std::fmt::Display;
 

@@ -1,14 +1,12 @@
-use crate::errors::ParserError;
 use crate::errors::span::Span;
-use crate::lexer::token::{KeywordKind, OperatorKind, PuncuationKind, TokenKind};
 use crate::resolver::ast::expression::Expression;
 use crate::resolver::ast::types::TypeRef;
-use anyhow::Result;
+use crate::resolver::symbol::SymbolId;
 use std::fmt::{self, Display};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LetStatement {
-    pub(crate) identifier: String,
+    pub(crate) identifier: SymbolId,
     pub(crate) value: Expression,
     pub(crate) span: Span,
     pub type_ref: TypeRef,
@@ -16,7 +14,7 @@ pub struct LetStatement {
 
 impl LetStatement {
     pub fn new(
-        identifier: String,
+        identifier: SymbolId,
         value: Expression,
         span: Span,
         type_ref: TypeRef,
