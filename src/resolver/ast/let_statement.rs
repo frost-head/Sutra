@@ -1,7 +1,6 @@
-use crate::errors::span::Span;
 use crate::resolver::ast::expression::Expression;
-use crate::resolver::ast::types::TypeRef;
 use crate::resolver::symbol::SymbolId;
+use crate::{errors::span::Span, resolver::ast::types::TypeRes};
 use std::fmt::{self, Display};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -9,7 +8,7 @@ pub struct LetStatement {
     pub(crate) identifier: SymbolId,
     pub(crate) value: Expression,
     pub(crate) span: Span,
-    pub type_ref: TypeRef,
+    pub type_res: TypeRes,
 }
 
 impl LetStatement {
@@ -17,13 +16,13 @@ impl LetStatement {
         identifier: SymbolId,
         value: Expression,
         span: Span,
-        type_ref: TypeRef,
+        type_res: TypeRes,
     ) -> LetStatement {
         LetStatement {
             identifier,
             value,
             span,
-            type_ref,
+            type_res,
         }
     }
 }

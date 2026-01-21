@@ -11,3 +11,9 @@ pub mod types;
 pub struct Ast {
     pub items: Vec<Item>,
 }
+
+impl Ast {
+    pub fn new() -> Self {
+        Ast { items: Vec::new() }
+    }
+}

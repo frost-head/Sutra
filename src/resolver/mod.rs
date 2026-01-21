@@ -8,6 +8,7 @@ use crate::parser::ast::{
     item::{Item, function::FuncItem},
     statement::Stmt,
 };
+use crate::resolver::ast::Ast as ResolvedAst;
 use crate::{
     errors::ResolverError,
     resolver::{
@@ -26,6 +27,7 @@ pub struct Resolver {
     pub scopes: Vec<Scope>,
     pub symbols: Vec<Symbol>,
     pub cur_scope: ScopeId,
+    pub ast: ResolvedAst,
 }
 impl std::fmt::Display for Resolver {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -68,10 +70,13 @@ impl Resolver {
             mutable: false,
         });
 
+        let ast = ResolvedAst::new();
+
         Resolver {
             scopes,
             symbols,
             cur_scope,
+            ast,
         }
     }
 
