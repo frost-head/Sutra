@@ -1,13 +1,10 @@
-use core::fmt;
 use crate::{errors::span::Span, resolver::ast::statement::Stmt, utils::indent_multiline};
+use core::fmt;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Block {
     pub statements: Vec<Stmt>,
     pub span: Span,
-}
-
-impl Block {
 }
 
 impl fmt::Display for Block {

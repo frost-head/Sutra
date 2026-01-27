@@ -2,13 +2,12 @@ use std::collections::HashMap;
 
 use anyhow::Result;
 
-use crate::parser::ast::{
-    Ast,
-    block::Block,
-    item::{Item, function::FuncItem},
-    statement::Stmt,
-};
+use crate::errors::span::Span;
 use crate::resolver::ast::Ast as ResolvedAst;
+use crate::resolver::ast::item::Item as ResolverItem;
+use crate::resolver::ast::item::function::FuncItem as ResolverFunc;
+use crate::resolver::ast::item::function::fn_params::Param;
+use crate::resolver::ast::item::function::fn_return::FnReturn;
 use crate::{
     errors::ResolverError,
     resolver::{
@@ -16,6 +15,16 @@ use crate::{
         symbol::{Symbol, SymbolId, SymbolKind},
     },
     utils::indent_multiline,
+};
+use crate::{
+    parser::ast::{
+        Ast,
+        block::Block,
+        item::{Item, function::FuncItem},
+        statement::Stmt,
+        types::TypeRef,
+    },
+    resolver::ast::types::TypeRes,
 };
 
 pub mod ast;
@@ -51,25 +60,36 @@ impl Resolver {
         let mut symbols = Vec::new();
         let cur_scope = ScopeId(0);
 
+        scopes[0]
+            .symbols
+            .insert("int".to_string(), SymbolId(symbols.len()));
         symbols.push(Symbol {
             name: "int".to_string(),
             kind: SymbolKind::PremitiveType(symbol::PremitiveTypes::Int),
             scope_id: cur_scope,
             mutable: false,
         });
+
+        scopes[0]
+            .symbols
+            .insert("float".to_string(), SymbolId(symbols.len()));
         symbols.push(Symbol {
             name: "float".to_string(),
             kind: SymbolKind::PremitiveType(symbol::PremitiveTypes::Float),
             scope_id: cur_scope,
             mutable: false,
         });
+
+        scopes[0]
+            .symbols
+            .insert("bool".to_string(), SymbolId(symbols.len()));
+
         symbols.push(Symbol {
             name: "bool".to_string(),
             kind: SymbolKind::PremitiveType(symbol::PremitiveTypes::Bool),
             scope_id: cur_scope,
             mutable: false,
         });
-
         let ast = ResolvedAst::new();
 
         Resolver {
@@ -106,7 +126,89 @@ impl Resolver {
             }
         }
 
+        for item in &ast.items {
+            match item {
+                Item::Function(func_item) => {
+                    self.funct_tree(func_item.clone())?;
+                }
+
+                _ => {
+                    eprintln!("Error occurred while parsing the input");
+                    std::process::exit(1);
+                }
+            }
+        }
+
         Ok(())
+    }
+
+    pub fn funct_tree(&mut self, func_item: FuncItem) -> Result<()> {
+        let id = self
+            .resolve_symbol(&func_item.clone().name)
+            .expect(format!("Failed to resolve symbol {}", &func_item.name).as_str());
+
+        let mut params = Vec::new();
+        if let Some(param) = func_item.params {
+            for p in param {
+                let type_res = self.type_ref_to_type_res(p.type_ref);
+                let symbol_id = self
+                    .resolve_symbol(&p.name)
+                    .expect(format!("Failed to resolve symbol {}", &p.name).as_str());
+                params.push(Param {
+                    id: symbol_id,
+                    type_res,
+                    span: p.span,
+                })
+            }
+        }
+
+        let return_type = func_item.return_type;
+
+        let fn_return: Option<FnReturn> = match return_type {
+            Some(return_type) => Some(FnReturn {
+                type_res: self.type_ref_to_type_res(return_type.type_ref),
+                span: return_type.span,
+            }),
+            None => None,
+        };
+
+        let params = if params.len() == 0 {
+            None
+        } else {
+            Some(params)
+        };
+
+        // let statements = Vec::new();
+
+        for stmt in func_item.body.statements {
+            match stmt {
+                Stmt::LetStmt(let_statement) => {
+                    println!("cur_scope : {:?}", self.cur_scope);
+                    println!("Statement: {:?}\n", let_statement);
+                    let sid = self.resolve_symbol(&let_statement.identifier);
+                    println!("Symbol ID: {:?}", sid);
+                }
+                Stmt::ReturnStmt(return_statement) => todo!(),
+                Stmt::Expr(expression) => todo!(),
+            }
+        }
+
+        // let func_item = ResolverFunc::new(id, params, return_type: fn_return,Block();
+        // );
+        // self.ast.items.push(ResolverItem::Function(func_item));
+
+        Ok(())
+    }
+
+    pub fn type_ref_to_type_res(&mut self, type_ref: TypeRef) -> TypeRes {
+        match type_ref {
+            TypeRef::Named { name, span } => TypeRes::Named {
+                id: self
+                    .resolve_symbol(&name)
+                    .expect(format!("Failed to resolve type {}", &name).as_str()),
+                span,
+            },
+        }
     }
 
     pub fn enter_scope(&mut self, parent: Option<ScopeId>) -> ScopeId {

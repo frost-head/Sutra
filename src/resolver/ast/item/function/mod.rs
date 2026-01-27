@@ -2,12 +2,13 @@ use anyhow::{Context, Result};
 use core::fmt;
 
 use crate::{
-    errors::ParserError,
-    lexer::token::{KeywordKind, OperatorKind, PuncuationKind, TokenKind},
-    parser::Parser,
-    parser::ast::{
-        block::Block,
-        item::function::{fn_params::Param, fn_return::FnReturn},
+    parser::ast::item::function::FuncItem as PaserFuncItem,
+    resolver::{
+        ast::{
+            block::Block,
+            item::function::{fn_params::Param, fn_return::FnReturn},
+        },
+        symbol::SymbolId,
     },
 };
 
@@ -16,7 +17,7 @@ pub mod fn_return;
 
 #[derive(Debug, Clone)]
 pub struct FuncItem {
-    pub name: String,
+    pub id: SymbolId,
     pub params: Option<Vec<Param>>,
     pub return_type: Option<FnReturn>,
     pub body: Block,
@@ -24,89 +25,23 @@ pub struct FuncItem {
 
 impl FuncItem {
     pub fn new(
-        name: String,
+        id: SymbolId,
         params: Option<Vec<Param>>,
         return_type: Option<FnReturn>,
         body: Block,
     ) -> Self {
         FuncItem {
-            name,
+            id,
             params,
             return_type,
             body,
         }
     }
-
-    pub fn parse(parser: &mut Parser) -> Result<FuncItem> {
-        let name: String;
-
-        parser.expect(TokenKind::Keyword(KeywordKind::Func))?;
-
-        let next = parser.peek()?;
-        match &next.kind {
-            TokenKind::Ident(id) => {
-                name = id.clone();
-                parser.consume()?;
-            }
-            _ => {
-                return Err(ParserError::UnexpectedToken {
-                    token: next.clone(),
-                }
-                .into());
-            }
-        }
-        let params = Param::parse_params(parser)?;
-
-        let mut return_type: Option<FnReturn> = None;
-
-        let next = parser.peek()?;
-        match next.kind {
-            TokenKind::Operator(OperatorKind::Minus) => {
-                return_type = Some(FnReturn::parse_fn_return(parser)?);
-            }
-            TokenKind::Punctuation(PuncuationKind::LeftCurlyParen) => {}
-            _ => {
-                return Err(ParserError::UnexpectedToken {
-                    token: next.clone(),
-                }
-                .into());
-            }
-        };
-
-        let next = parser.peek()?;
-        match next.kind {
-            TokenKind::Punctuation(PuncuationKind::LeftCurlyParen) => {}
-            _ => {
-                return Err(ParserError::UnexpectedToken {
-                    token: next.clone(),
-                }
-                .into());
-            }
-        };
-
-        let body = Block::parse(parser).context("Error while parsing function body")?;
-
-        if params.len() == 0 {
-            return Ok(FuncItem {
-                name,
-                body,
-                params: None,
-                return_type,
-            });
-        }
-
-        Ok(FuncItem {
-            name,
-            params: Some(params),
-            body,
-            return_type,
-        })
-    }
 }
 
 impl fmt::Display for FuncItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "function {}(", self.name)?;
+        write!(f, "function {}(", self.id)?;
         if let Some(params) = &self.params {
             for (i, param) in params.iter().enumerate() {
                 if i > 0 {

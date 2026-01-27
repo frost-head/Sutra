@@ -32,10 +32,12 @@ fn main() -> Result<()> {
 
     let mut resolver = Resolver::new();
 
+    // println!("resolver : {:?}", resolver);
+
     let ast = parser.ast.clone();
 
     resolver.resolve_global(ast)?;
-    println!("resolver : {}", resolver);
+    // println!("resolver : {}", resolver);
 
     Ok(())
 }
