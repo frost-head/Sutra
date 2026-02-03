@@ -56,6 +56,7 @@ impl Resolver {
         scopes.push(Scope {
             symbols: HashMap::new(),
             parent: None,
+            children: Vec::new(),
         });
         let mut symbols = Vec::new();
         let cur_scope = ScopeId(0);
@@ -144,7 +145,7 @@ impl Resolver {
 
     pub fn funct_tree(&mut self, func_item: FuncItem) -> Result<()> {
         let id = self
-            .resolve_symbol(&func_item.clone().name)
+            .resolve_symbol(&func_item.clone().name, None)
             .expect(format!("Failed to resolve symbol {}", &func_item.name).as_str());
 
         let mut params = Vec::new();
@@ -152,7 +153,7 @@ impl Resolver {
             for p in param {
                 let type_res = self.type_ref_to_type_res(p.type_ref);
                 let symbol_id = self
-                    .resolve_symbol(&p.name)
+                    .resolve_symbol(&p.name, None)
                     .expect(format!("Failed to resolve symbol {}", &p.name).as_str());
                 params.push(Param {
                     id: symbol_id,
@@ -185,7 +186,21 @@ impl Resolver {
                 Stmt::LetStmt(let_statement) => {
                     println!("cur_scope : {:?}", self.cur_scope);
                     println!("Statement: {:?}\n", let_statement);
-                    let sid = self.resolve_symbol(&let_statement.identifier);
+                    let func_sym = self
+                        .resolve_symbol(&func_item.name, None)
+                        .expect(format!("Failed to resolve function {}", &func_item.name).as_str());
+
+                    let sym = self
+                        .symbols
+                        .get(func_sym.0)
+                        .expect(format!("Could not get the symbol {}", &func_item.name).as_str());
+
+                    println!(
+                        "self.scopes[sym.scope_id.0]: {:?}",
+                        self.scopes[sym.scope_id.0]
+                    );
+
+                    let sid = self.resolve_symbol(&let_statement.identifier, None);
                     println!("Symbol ID: {:?}", sid);
                 }
                 Stmt::ReturnStmt(return_statement) => todo!(),
@@ -204,7 +219,7 @@ impl Resolver {
         match type_ref {
             TypeRef::Named { name, span } => TypeRes::Named {
                 id: self
-                    .resolve_symbol(&name)
+                    .resolve_symbol(&name, None)
                     .expect(format!("Failed to resolve type {}", &name).as_str()),
                 span,
             },
@@ -216,7 +231,9 @@ impl Resolver {
         self.scopes.push(Scope {
             symbols: HashMap::new(),
             parent,
+            children: Vec::new(),
         });
+        self.scopes[self.cur_scope.0].children.push(id);
         self.cur_scope = id.clone();
         id
     }
@@ -245,8 +262,11 @@ impl Resolver {
         Ok(())
     }
 
-    pub fn resolve_symbol(&self, name: &str) -> Option<SymbolId> {
+    pub fn resolve_symbol(&self, name: &str, scope_id: Option<ScopeId>) -> Option<SymbolId> {
         let mut current_scope = self.cur_scope;
+        if let Some(scope_id) = scope_id {
+            current_scope = scope_id;
+        }
 
         while let Some(scope) = self.scopes.get(current_scope.0) {
             if let Some(symbol_id) = scope.symbols.get(name) {

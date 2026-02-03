@@ -8,13 +8,15 @@ pub struct ScopeId(pub usize);
 pub struct Scope {
     pub symbols: HashMap<String, SymbolId>,
     pub parent: Option<ScopeId>,
+    pub children: Vec<ScopeId>,
 }
 
 impl Scope {
-    pub fn new(parent: Option<ScopeId>) -> Self {
+    pub fn new(parent: Option<ScopeId>, children: Vec<ScopeId>) -> Self {
         Scope {
             symbols: HashMap::new(),
             parent,
+            children,
         }
     }
 }
