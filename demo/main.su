@@ -1,14 +1,12 @@
 func main() {
-    let x = (5 * 8) + 3;
-    let y = if (x < y) {
-        let y = -2;
-    };
+    let x : int = (5 * 8) + 3;
+    let y : int = 5;
+    let z : bool = true;
+}
 
-    if (x < y) {
-        x = 2;
-    }
-    else{
-        let x = 3;
-    }
+func add(a: int, b: int) -> int {
+    return a + b;
+}
+func true_or_false(c : bool) -> bool {
     return c;
 }

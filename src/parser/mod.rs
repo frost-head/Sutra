@@ -1,14 +1,16 @@
 use anyhow::{Context, Result};
 
-use crate::ast::item::Item;
-use crate::ast::item::function::FuncItem;
 use crate::errors::ParserError;
 use crate::lexer::token::{KeywordKind, TokenKind};
 use crate::{
-    ast::Ast,
     lexer::{Lexer, token::Token},
+    parser::ast::Ast,
 };
+use ast::item::Item;
+use ast::item::function::FuncItem;
 use std::iter::Peekable;
+
+pub mod ast;
 
 pub struct Parser<'a> {
     pub tokens: Peekable<Lexer<'a>>,

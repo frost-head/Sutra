@@ -1,7 +1,7 @@
-use crate::ast::expression::Expression;
 use crate::errors::span::Span;
 use crate::lexer::token::{KeywordKind, PuncuationKind, TokenKind};
 use crate::parser::Parser;
+use crate::parser::ast::expression::Expression;
 use anyhow::Result;
 use core::fmt;
 use std::fmt::Display;

@@ -1,8 +1,8 @@
 use crate::{
-    ast::expression::{Expression, ExpressionKind, if_expr::parse_if},
     errors::{ParserError, span::Span},
     lexer::token::{KeywordKind, OperatorKind, PuncuationKind, TokenKind},
     parser::Parser,
+    parser::ast::expression::{Expression, ExpressionKind, if_expr::parse_if},
 };
 use anyhow::{Context, Ok, Result};
 
@@ -35,9 +35,7 @@ impl Expression {
                 })
             }
 
-            TokenKind::Keyword(KeywordKind::If) => {
-                parse_if(parser)
-            }
+            TokenKind::Keyword(KeywordKind::If) => parse_if(parser),
 
             TokenKind::Operator(OperatorKind::Bang) => {
                 let tok = parser.consume()?; // consume `!`

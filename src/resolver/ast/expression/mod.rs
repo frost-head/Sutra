@@ -1,7 +1,7 @@
 use crate::{
-    ast::{block::Block, expression::assign::Identifier},
     errors::span::Span,
     lexer::token::OperatorKind,
+    resolver::ast::{block::Block, expression::assign::Identifier},
 };
 use core::fmt;
 pub mod assign;

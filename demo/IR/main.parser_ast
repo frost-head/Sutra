@@ -1,0 +1,22 @@
+function main() 
+{
+    Let Statement:
+      Identifier: x
+      Value: ((5 * 8) + 3) 
+    Let Statement:
+      Identifier: y
+      Value: 5 
+    Let Statement:
+      Identifier: z
+      Value: true 
+}
+function add(a: int, b: int) -> int 
+{
+    Return Statement:
+        Value: (a + b) 
+}
+function true_or_false(c: bool) -> bool 
+{
+    Return Statement:
+        Value: c 
+}

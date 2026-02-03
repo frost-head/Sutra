@@ -2,7 +2,9 @@ use anyhow::Result;
 use clap::Parser as clap_parser;
 use std::fs;
 use sutra::parser::Parser;
-use sutra::{ast::item::Item, lexer::Lexer};
+use sutra::resolver::Resolver;
+
+use sutra::{lexer::Lexer, parser::ast::item::Item};
 
 fn main() -> Result<()> {
     let content = read_file();
@@ -20,22 +22,32 @@ fn main() -> Result<()> {
                 output_buffer.push_str(&func_item.to_string());
             }
             _ => {
-                eprintln!("Error occured while parsing the input");
+                eprintln!("Error occurred while parsing the input");
                 std::process::exit(1);
             }
         }
     }
 
-    write_file(output_buffer);
+    write_to_file(output_buffer, "demo/IR/main.parser_ast".to_string());
+
+    let mut resolver = Resolver::new();
+
+    // println!("resolver : {:?}", resolver);
+
+    let ast = parser.ast.clone();
+
+    resolver.resolve_global(ast)?;
+    // println!("resolver : {}", resolver);
+
     Ok(())
 }
 
 #[derive(clap_parser)]
 struct Args {
     /// Input file to read
-    #[clap(short, long)]
+    #[clap(short, long, default_value = "demo/main.su")]
     input_file: String,
-    #[clap(short, long)]
+    #[clap(short, long, default_value = "demo/main.ir")]
     output_file: String,
 }
 
@@ -45,7 +57,6 @@ fn read_file() -> String {
     content
 }
 
-fn write_file(output_buffer: String) {
-    let args = Args::parse();
-    fs::write(args.output_file, &output_buffer).expect("failed to write file");
+fn write_to_file(output_buffer: String, file_name: String) {
+    fs::write(file_name, &output_buffer).expect("failed to write file");
 }

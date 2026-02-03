@@ -55,6 +55,8 @@ pub enum KeywordKind {
     Return,
     Func,
     Struct,
+    Int,
+    Bool,
 }
 
 impl fmt::Display for Token {
@@ -104,6 +106,8 @@ impl fmt::Display for KeywordKind {
             KeywordKind::Return => write!(f, "Return"),
             KeywordKind::Func => write!(f, "Function"),
             KeywordKind::Struct => write!(f, "Struct"),
+            KeywordKind::Int => write!(f, "Int"),
+            KeywordKind::Bool => write!(f, "Bool"),
         }
     }
 }
